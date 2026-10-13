@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "market-abroad",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "MarketAbroad-Shopping-Website", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}
