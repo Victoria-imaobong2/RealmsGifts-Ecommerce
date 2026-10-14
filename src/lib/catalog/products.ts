@@ -1,0 +1,697 @@
+/**
+ * STARTER CATALOGUE — development/preview data.
+ *
+ * These listings demonstrate the catalogue structure. Names, prices and
+ * descriptions are placeholders to be replaced with real supplier data before
+ * launch. No brands, reviews, certifications or discounts are claimed, and
+ * stock is `null` (not tracked) rather than an invented quantity.
+ */
+import { unsplash } from "./images";
+import type { Product } from "./types";
+
+type Input = Omit<Product, "id" | "currency" | "source" | "giftWrap" | "sameDayEligible" | "stock"> &
+  Partial<Pick<Product, "giftWrap" | "sameDayEligible" | "stock">>;
+
+const p = (input: Input): Product => ({
+  id: input.slug,
+  currency: "USD",
+  source: "starter",
+  giftWrap: true,
+  sameDayEligible: false,
+  stock: null,
+  ...input,
+});
+
+const FOOD_STORAGE = "Store in a cool, dry place away from direct sunlight.";
+
+export const STARTER_PRODUCTS: Product[] = [
+  // ── Flowers ──────────────────────────────────────────────────────────────
+  p({
+    slug: "classic-red-rose-bouquet", name: "Classic Red Rose Bouquet", sku: "RG-FLW-001", category: "flowers", subcategory: "Roses",
+    shortDescription: "A timeless hand-tied bouquet of deep red roses.",
+    description: "Deep red roses, hand-tied and wrapped for a moment that says everything without a word. A classic for anniversaries, Valentine's Day, or simply because.",
+    price: 69.99, images: [unsplash("1561729098-cbab0f7a9f7c", "A hand-tied bouquet of deep red roses"), unsplash("1730749387748-79e6d50a269c", "A large arrangement of red roses in a wooden crate")],
+    occasions: ["anniversary", "valentines-day", "just-because", "birthday"], recipients: ["her", "partner", "mom"],
+    options: [{ name: "Size", values: ["12 stems", "24 stems"] }],
+    details: [{ label: "Flowers", value: "Red roses with seasonal greenery" }, { label: "Presentation", value: "Hand-tied and wrapped" }],
+    care: "Trim stems at an angle, place in fresh water and change the water every two days.",
+    sameDayEligible: true, featured: true, addedAt: "2026-02-01",
+  }),
+  p({
+    slug: "pink-rose-bouquet", name: "Pink Rose Bouquet", sku: "RG-FLW-002", category: "flowers", subcategory: "Roses",
+    shortDescription: "Soft pink roses wrapped in blush paper.",
+    description: "A soft, romantic bouquet of pink roses wrapped in blush paper. Gentle enough for Mother's Day, sweet enough for any day.",
+    price: 64.99, images: [unsplash("1680563094046-5d846e2c59d1", "A bouquet of pink roses wrapped in pink paper"), unsplash("1679621711784-8485ebe333f5", "Pink roses arranged in a vase on a table")],
+    occasions: ["mothers-day", "birthday", "thank-you", "just-because"], recipients: ["her", "mom", "friend", "grandparent"],
+    options: [{ name: "Size", values: ["12 stems", "24 stems"] }],
+    details: [{ label: "Flowers", value: "Pink roses with seasonal greenery" }, { label: "Presentation", value: "Wrapped in blush paper" }],
+    care: "Trim stems at an angle, place in fresh water and change the water every two days.",
+    sameDayEligible: true, addedAt: "2026-03-10",
+  }),
+  p({
+    slug: "sunflower-bouquet", name: "Sunflower Bouquet", sku: "RG-FLW-003", category: "flowers", subcategory: "Seasonal",
+    shortDescription: "Bright sunflowers to light up any room.",
+    description: "Cheerful sunflowers bundled with fresh greenery. A ray of sunshine for a friend who needs it, a colleague who earned it, or anyone recovering at home.",
+    price: 49.99, images: [unsplash("1601884928885-92a922f7962f", "A person holding a bouquet of yellow sunflowers"), unsplash("1629386255808-c3ceb405173c", "A bouquet of sunflowers wrapped in kraft paper")],
+    occasions: ["get-well-soon", "thank-you", "congratulations", "just-because"], recipients: ["friend", "coworker", "her", "mom"],
+    details: [{ label: "Flowers", value: "Sunflowers with seasonal greenery" }],
+    care: "Keep in fresh water out of direct heat. Remove leaves below the waterline.",
+    sameDayEligible: true, addedAt: "2026-05-02",
+  }),
+  p({
+    slug: "mixed-seasonal-bouquet", name: "Mixed Seasonal Bouquet", sku: "RG-FLW-004", category: "flowers", subcategory: "Seasonal",
+    shortDescription: "A florist's choice of the season's best blooms.",
+    description: "A generous mix of the season's freshest blooms, arranged by our florist partners. Every bouquet is a little different — that's the charm.",
+    price: 59.99, images: [unsplash("1572454591674-2739f30d8c40", "A mixed bouquet of pink, beige and red flowers in a glass vase"), unsplash("1589100534833-475e31a17b4e", "A vibrant bouquet of gerbera daisies and roses")],
+    occasions: ["birthday", "housewarming", "thank-you", "get-well-soon", "just-because"], recipients: ["her", "mom", "friend", "family", "grandparent"],
+    details: [{ label: "Flowers", value: "Florist's selection of seasonal stems" }],
+    care: "Trim stems, use fresh water and keep away from ripening fruit.",
+    sameDayEligible: true, featured: true, addedAt: "2026-04-18",
+  }),
+
+  // ── Cakes & desserts ────────────────────────────────────────────────────
+  p({
+    slug: "classic-chocolate-cake", name: "Classic Chocolate Cake", sku: "RG-CAK-001", category: "cakes", subcategory: "Celebration cakes",
+    shortDescription: "Rich chocolate layers with silky ganache.",
+    description: "Moist chocolate sponge layered with chocolate frosting and finished with glossy ganache. A crowd-pleaser for birthdays and celebrations of every size.",
+    price: 54.99, images: [unsplash("1605807646983-377bc5a76493", "A chocolate layer cake topped with cherries"), unsplash("1602351447937-745cb720612f", "A layered chocolate cake with ganache drips")],
+    occasions: ["birthday", "congratulations", "just-because"], recipients: ["family", "friend", "kids", "him", "her"],
+    options: [{ name: "Size", values: ['6" (serves 6–8)', '8" (serves 10–12)'] }],
+    personalization: { label: "Message on cake", placeholder: "Happy Birthday, Ada!", maxLength: 30 },
+    details: [{ label: "Allergens", value: "Contains wheat, milk and eggs. Made in a kitchen that handles nuts." }, { label: "Storage", value: "Keep refrigerated. Best enjoyed within 3 days." }],
+    sameDayEligible: true, featured: true, addedAt: "2026-01-20",
+  }),
+  p({
+    slug: "red-velvet-celebration-cake", name: "Red Velvet Celebration Cake", sku: "RG-CAK-002", category: "cakes", subcategory: "Celebration cakes",
+    shortDescription: "Velvety red layers with cream cheese frosting.",
+    description: "Soft red velvet layers with smooth cream cheese frosting — a showstopper slice for anniversaries, birthdays and Valentine's Day.",
+    price: 59.99, images: [unsplash("1688153009623-0d9a3ba1b105", "A red velvet cake with a slice cut out"), unsplash("1586788680434-30d324b2d46f", "Slices of red velvet cake on a white plate")],
+    occasions: ["birthday", "anniversary", "valentines-day", "congratulations"], recipients: ["partner", "her", "family", "friend"],
+    options: [{ name: "Size", values: ['6" (serves 6–8)', '8" (serves 10–12)'] }],
+    personalization: { label: "Message on cake", placeholder: "Happy Anniversary", maxLength: 30 },
+    details: [{ label: "Allergens", value: "Contains wheat, milk and eggs. Made in a kitchen that handles nuts." }, { label: "Storage", value: "Keep refrigerated. Best enjoyed within 3 days." }],
+    sameDayEligible: true, addedAt: "2026-02-05",
+  }),
+  p({
+    slug: "vanilla-cake", name: "Vanilla Bean Cake", sku: "RG-CAK-003", category: "cakes", subcategory: "Celebration cakes",
+    shortDescription: "Light vanilla sponge with buttercream and fresh flowers.",
+    description: "Light vanilla bean sponge with buttercream, simply decorated. An elegant choice for birthdays, showers and small celebrations.",
+    price: 49.99, images: [unsplash("1704358826048-04d97dde2f96", "A vanilla cake with white frosting decorated with flowers")],
+    occasions: ["birthday", "baby-shower", "wedding", "congratulations"], recipients: ["family", "friend", "kids", "her"],
+    options: [{ name: "Size", values: ['6" (serves 6–8)', '8" (serves 10–12)'] }],
+    personalization: { label: "Message on cake", placeholder: "Congratulations!", maxLength: 30 },
+    details: [{ label: "Allergens", value: "Contains wheat, milk and eggs. Made in a kitchen that handles nuts." }, { label: "Storage", value: "Keep refrigerated. Best enjoyed within 3 days." }],
+    sameDayEligible: true, addedAt: "2026-03-02",
+  }),
+  p({
+    slug: "cupcake-box", name: "Cupcake Box", sku: "RG-CAK-004", category: "cakes", subcategory: "Cupcakes",
+    shortDescription: "A box of freshly frosted cupcakes.",
+    description: "A box of freshly baked cupcakes in assorted flavors, each finished with swirls of frosting. Perfect for sharing at the office or at home.",
+    price: 34.99, images: [unsplash("1677840147161-49e9c1508b0b", "A box of cupcakes with pink frosting"), unsplash("1587536849024-daaa4a417b16", "Cupcakes with white, green and pink icing")],
+    occasions: ["birthday", "thank-you", "baby-shower", "just-because"], recipients: ["coworker", "friend", "kids", "family"],
+    options: [{ name: "Quantity", values: ["6 cupcakes", "12 cupcakes"] }],
+    details: [{ label: "Allergens", value: "Contains wheat, milk and eggs. Made in a kitchen that handles nuts." }, { label: "Storage", value: "Keep cool. Best enjoyed within 2 days." }],
+    sameDayEligible: true, addedAt: "2026-04-01",
+  }),
+
+  // ── Chocolates & sweet treats ───────────────────────────────────────────
+  p({
+    slug: "premium-chocolate-box", name: "Premium Chocolate Box", sku: "RG-CHO-001", category: "chocolates", subcategory: "Chocolate",
+    shortDescription: "An assortment of handcrafted chocolates.",
+    description: "A curated assortment of milk, dark and white chocolates, presented in a keepsake box. An easy yes for almost anyone on your list.",
+    price: 39.99, images: [unsplash("1687795097254-f019f9d7fd17", "An open box of assorted chocolates"), unsplash("1548741487-18d363dc4469", "A box of neatly arranged chocolates")],
+    occasions: ["valentines-day", "thank-you", "birthday", "anniversary", "just-because"], recipients: ["her", "partner", "friend", "coworker", "mom"],
+    options: [{ name: "Size", values: ["16 pieces", "32 pieces"] }],
+    details: [{ label: "Allergens", value: "Contains milk and soy. May contain nuts." }, { label: "Storage", value: FOOD_STORAGE }],
+    sameDayEligible: true, featured: true, addedAt: "2026-01-12",
+  }),
+  p({
+    slug: "gourmet-cookie-box", name: "Gourmet Cookie Box", sku: "RG-CHO-002", category: "chocolates", subcategory: "Cookies",
+    shortDescription: "Bakery-style cookies in a gift box.",
+    description: "Thick, bakery-style cookies in classic flavors, packed in a gift box. A warm, nostalgic gift that's easy to share.",
+    price: 29.99, images: [unsplash("1772651392135-b891a5e4f8a3", "Assorted gourmet cookies in a gift box"), unsplash("1554175231-8367073ba4e3", "Chocolate chip cookies in a box")],
+    occasions: ["thank-you", "birthday", "get-well-soon", "just-because"], recipients: ["coworker", "friend", "family", "kids", "dad"],
+    details: [{ label: "Allergens", value: "Contains wheat, milk and eggs. May contain nuts." }, { label: "Storage", value: FOOD_STORAGE }],
+    sameDayEligible: true, addedAt: "2026-05-20",
+  }),
+  p({
+    slug: "sweet-treat-box", name: "Macaron Treat Box", sku: "RG-CHO-003", category: "chocolates", subcategory: "Treats",
+    shortDescription: "Delicate French-style macarons in pastel shades.",
+    description: "A box of delicate French-style macarons in pastel colors and assorted flavors. Light, elegant and lovely to unwrap.",
+    price: 24.99, images: [unsplash("1491821893533-80f535044695", "French macarons in a white box"), unsplash("1676292943577-65f74f4a52e2", "A box of colorful macarons on a table")],
+    occasions: ["thank-you", "birthday", "baby-shower", "just-because"], recipients: ["her", "friend", "coworker", "mom"],
+    details: [{ label: "Allergens", value: "Contains almonds, eggs and milk." }, { label: "Storage", value: "Keep cool. Best enjoyed within 5 days." }],
+    sameDayEligible: true, addedAt: "2026-06-03",
+  }),
+
+  // ── Gift boxes & hampers ────────────────────────────────────────────────
+  p({
+    slug: "luxury-birthday-hamper", name: "Luxury Birthday Hamper", sku: "RG-GBX-001", category: "gift-boxes", subcategory: "Hampers",
+    shortDescription: "A generous hamper of treats, a candle and a keepsake.",
+    description: "Our most generous birthday hamper: sweet treats, a scented candle, a book-style keepsake and a handwritten card, finished with ribbon in a woven basket.",
+    price: 219.99, images: [unsplash("1769286145156-70a40fff80ec", "A gift basket with a book, candle and ribbon"), unsplash("1508899203029-1c9eb493c9bd", "A gift basket filled with treats")],
+    occasions: ["birthday", "congratulations"], recipients: ["her", "mom", "family", "partner", "friend"],
+    details: [{ label: "Includes", value: "Assorted sweet treats, scented candle, keepsake and card" }, { label: "Allergens", value: "Food items contain wheat, milk and nuts." }],
+    sameDayEligible: true, featured: true, addedAt: "2026-02-20",
+  }),
+  p({
+    slug: "self-care-gift-box", name: "Self-Care Gift Box", sku: "RG-GBX-002", category: "gift-boxes", subcategory: "Gift boxes",
+    shortDescription: "A calming collection for a well-earned night in.",
+    description: "Everything for a slow evening: body care, a soothing candle and a little something sweet, tucked into a ribbon-tied box.",
+    price: 74.99, images: [unsplash("1610551745215-1a4b5f36de8f", "A person holding a pink and white gift box"), unsplash("1778333485565-416699e6d645", "A scented candle in an open gift box")],
+    occasions: ["birthday", "get-well-soon", "thank-you", "just-because", "mothers-day"], recipients: ["her", "mom", "friend", "partner"],
+    details: [{ label: "Includes", value: "Body care, scented candle and a sweet treat" }],
+    sameDayEligible: true, featured: true, addedAt: "2026-03-15",
+  }),
+  p({
+    slug: "celebration-gift-box", name: "Celebration Gift Box", sku: "RG-GBX-003", category: "gift-boxes", subcategory: "Gift boxes",
+    shortDescription: "A ribbon-wrapped box made for big news.",
+    description: "A festive, ribbon-wrapped box of treats and small luxuries for promotions, graduations and every 'we did it' moment.",
+    price: 89.99, images: [unsplash("1513201099705-a9746e1e201f", "A kraft gift box tied with a pink ribbon"), unsplash("1674620213535-9b2a2553ef40", "Two gift boxes with gold bows")],
+    occasions: ["congratulations", "graduation", "birthday", "engagement"], recipients: ["friend", "coworker", "family", "him", "her"],
+    details: [{ label: "Includes", value: "Assorted treats and small keepsakes" }],
+    sameDayEligible: true, addedAt: "2026-04-10",
+  }),
+  p({
+    slug: "appreciation-box", name: "Appreciation Box", sku: "RG-GBX-004", category: "gift-boxes", subcategory: "Gift boxes",
+    shortDescription: "A simple, elegant way to say thank you.",
+    description: "A clean, elegant box with a thank-you card and curated treats. Ideal for coworkers, hosts, teachers and anyone who went the extra mile.",
+    price: 44.99, images: [unsplash("1620843437920-ead942b3abd3", "A white gift box with a thank-you note"), unsplash("1766425221306-4d44f4011d4a", "Kraft gift boxes tied with red and white string")],
+    occasions: ["thank-you", "housewarming", "just-because"], recipients: ["coworker", "friend", "family", "grandparent"],
+    details: [{ label: "Includes", value: "Thank-you card and curated treats" }],
+    sameDayEligible: true, addedAt: "2026-05-08",
+  }),
+
+  // ── Perfumes ────────────────────────────────────────────────────────────
+  p({
+    slug: "floral-fragrance", name: "Floral Eau de Parfum", sku: "RG-FRG-001", category: "perfumes", subcategory: "Women's fragrance",
+    shortDescription: "A soft, romantic floral scent.",
+    description: "A soft floral fragrance with a romantic, airy character, presented in a sculpted glass bottle.",
+    price: 79.99, images: [unsplash("1615108395437-df128ad79e80", "A sculpted glass perfume bottle among soft petals")],
+    occasions: ["birthday", "anniversary", "valentines-day", "mothers-day"], recipients: ["her", "mom", "partner"],
+    options: [{ name: "Size", values: ["50 ml", "100 ml"] }],
+    details: [{ label: "Scent family", value: "Floral" }, { label: "Type", value: "Eau de parfum" }],
+    featured: true, addedAt: "2026-02-10",
+  }),
+  p({
+    slug: "woody-fragrance", name: "Woody Eau de Parfum", sku: "RG-FRG-002", category: "perfumes", subcategory: "Men's fragrance",
+    shortDescription: "A warm, amber-toned woody scent.",
+    description: "A warm, grounding fragrance with woody and amber character in a weighty glass bottle.",
+    price: 84.99, images: [unsplash("1638295916768-459f6cf440bc", "An amber glass perfume bottle with a black cap")],
+    occasions: ["birthday", "anniversary", "fathers-day", "christmas"], recipients: ["him", "dad", "partner"],
+    options: [{ name: "Size", values: ["50 ml", "100 ml"] }],
+    details: [{ label: "Scent family", value: "Woody / amber" }, { label: "Type", value: "Eau de parfum" }],
+    addedAt: "2026-03-22",
+  }),
+  p({
+    slug: "fresh-citrus-fragrance", name: "Fresh Citrus Eau de Toilette", sku: "RG-FRG-003", category: "perfumes", subcategory: "Unisex fragrance",
+    shortDescription: "A bright, clean citrus scent for every day.",
+    description: "A bright, clean citrus fragrance that's easy to wear every day — a thoughtful pick when you're not sure of their style.",
+    price: 64.99, images: [unsplash("1594125311687-3b1b3eafa9f4", "A minimal clear glass fragrance bottle with a black cap")],
+    occasions: ["birthday", "graduation", "just-because"], recipients: ["him", "her", "friend", "partner"],
+    options: [{ name: "Size", values: ["50 ml", "100 ml"] }],
+    details: [{ label: "Scent family", value: "Citrus" }, { label: "Type", value: "Eau de toilette" }],
+    addedAt: "2026-06-12",
+  }),
+  p({
+    slug: "fragrance-gift-set", name: "Fragrance Discovery Set", sku: "RG-FRG-004", category: "perfumes", subcategory: "Gift sets",
+    shortDescription: "A set of travel-size fragrances to explore.",
+    description: "A discovery set of travel-size fragrances across floral, woody and fresh families, so they can find a new favorite.",
+    price: 54.99, images: [unsplash("1622618991746-fe6004db3a47", "A glass perfume bottle beside small cosmetic jars"), unsplash("1773527142299-59863d536e1b", "Four small colorful perfume bottles")],
+    occasions: ["birthday", "christmas", "thank-you", "just-because"], recipients: ["her", "him", "friend", "partner"],
+    details: [{ label: "Includes", value: "Assorted travel-size fragrances" }],
+    addedAt: "2026-07-01",
+  }),
+
+  // ── Jewelry ─────────────────────────────────────────────────────────────
+  p({
+    slug: "pendant-necklace", name: "Gemstone Pendant Necklace", sku: "RG-JWL-001", category: "jewelry", subcategory: "Necklaces",
+    shortDescription: "A faceted pendant on a fine chain.",
+    description: "A faceted gemstone-style pendant on a fine chain — a piece they'll reach for again and again.",
+    price: 89.99, images: [unsplash("1599643477877-530eb83abc8e", "A pendant necklace with a faceted green stone"), unsplash("1589128777073-263566ae5e4d", "A silver pendant necklace on a white background")],
+    occasions: ["anniversary", "birthday", "valentines-day", "mothers-day", "graduation"], recipients: ["her", "partner", "mom"],
+    options: [{ name: "Chain length", values: ['16"', '18"'] }],
+    details: [{ label: "Finish", value: "Polished" }, { label: "Closure", value: "Lobster clasp" }],
+    care: "Store separately in a soft pouch. Remove before swimming or showering.",
+    featured: true, addedAt: "2026-01-28",
+  }),
+  p({
+    slug: "minimalist-bracelet", name: "Minimalist Chain Bracelet", sku: "RG-JWL-002", category: "jewelry", subcategory: "Bracelets",
+    shortDescription: "A delicate gold-tone chain bracelet.",
+    description: "A delicate gold-tone chain bracelet that layers beautifully or shines on its own.",
+    price: 49.99, images: [unsplash("1602173574767-37ac01994b2a", "A gold chain bracelet resting on a magazine"), unsplash("1628872354761-c289e269092f", "A gold bracelet on a white surface")],
+    occasions: ["birthday", "graduation", "just-because", "thank-you"], recipients: ["her", "friend", "partner"],
+    options: [{ name: "Size", values: ['6.5"', '7"', '7.5"'] }],
+    details: [{ label: "Finish", value: "Gold tone" }],
+    care: "Wipe with a soft dry cloth. Avoid perfume and water.",
+    personalization: { label: "Engraving (initials)", placeholder: "A.O.", maxLength: 6 },
+    addedAt: "2026-04-22",
+  }),
+  p({
+    slug: "hoop-earrings", name: "Classic Hoop Earrings", sku: "RG-JWL-003", category: "jewelry", subcategory: "Earrings",
+    shortDescription: "Polished gold-tone hoops for every day.",
+    description: "Polished gold-tone hoops with a comfortable hinged closure — the everyday staple every jewelry box needs.",
+    price: 39.99, images: [unsplash("1708220040824-b273dd0a17cc", "Gold hoop earrings displayed on a white stand"), unsplash("1632525230528-ec17c49bc168", "A pair of gold earrings on a white surface")],
+    occasions: ["birthday", "just-because", "graduation", "christmas"], recipients: ["her", "friend", "mom"],
+    details: [{ label: "Finish", value: "Gold tone" }, { label: "Closure", value: "Hinged" }],
+    care: "Store in a dry pouch and wipe clean after wear.",
+    addedAt: "2026-05-30",
+  }),
+  p({
+    slug: "jewelry-gift-set", name: "Jewelry Gift Set", sku: "RG-JWL-004", category: "jewelry", subcategory: "Gift sets",
+    shortDescription: "A matching pendant and earring set in a gift box.",
+    description: "A coordinated pendant and earring set presented in a lined gift box — a special-occasion gift that's ready to give.",
+    price: 229.99, images: [unsplash("1790159264948-2e801ea7e9b2", "Matching crystal earrings and pendant in a gift box"), unsplash("1515562141207-7a88fb7ce338", "A pearl necklace in an open jewelry box")],
+    occasions: ["anniversary", "valentines-day", "wedding", "engagement", "mothers-day"], recipients: ["her", "partner", "mom"],
+    details: [{ label: "Includes", value: "Pendant necklace and matching earrings" }, { label: "Presentation", value: "Lined gift box" }],
+    care: "Store pieces separately to avoid scratches.",
+    featured: true, addedAt: "2026-07-14",
+  }),
+
+  // ── Watches ─────────────────────────────────────────────────────────────
+  p({
+    slug: "classic-analog-watch", name: "Classic Analog Watch", sku: "RG-WCH-001", category: "watches", subcategory: "Analog",
+    shortDescription: "A clean white dial on a brown leather strap.",
+    description: "A clean white dial, slim case and brown leather strap. Understated and easy to wear with everything.",
+    price: 149.99, images: [unsplash("1556597130-ef7aa3c71ff5", "A silver analog watch with a white dial and brown leather strap"), unsplash("1557531365-e8b22d93dbd0", "A gray analog watch with a brown band")],
+    occasions: ["birthday", "graduation", "fathers-day", "anniversary"], recipients: ["him", "dad", "partner"],
+    details: [{ label: "Movement", value: "Quartz" }, { label: "Strap", value: "Leather" }],
+    care: "Avoid prolonged water exposure. Keep the leather strap dry.",
+    personalization: { label: "Caseback engraving", placeholder: "Always yours", maxLength: 20 },
+    featured: true, addedAt: "2026-02-14",
+  }),
+  p({
+    slug: "minimalist-dress-watch", name: "Minimalist Dress Watch", sku: "RG-WCH-002", category: "watches", subcategory: "Dress",
+    shortDescription: "A slim, refined watch for special occasions.",
+    description: "A slim, refined dress watch with a minimal dial — made for weddings, dinners and big meetings.",
+    price: 179.99, images: [unsplash("1524592094714-0f0654e20314", "A hand holding a minimalist analog watch"), unsplash("1617317376997-8748e6862c01", "A silver and white analog watch")],
+    occasions: ["wedding", "anniversary", "graduation", "engagement"], recipients: ["him", "her", "partner"],
+    details: [{ label: "Movement", value: "Quartz" }, { label: "Strap", value: "Leather" }],
+    care: "Avoid water exposure. Store in its box when not worn.",
+    addedAt: "2026-06-21",
+  }),
+  p({
+    slug: "everyday-sports-watch", name: "Everyday Chronograph Watch", sku: "RG-WCH-003", category: "watches", subcategory: "Sport",
+    shortDescription: "A rugged chronograph built for daily wear.",
+    description: "A sporty chronograph with a bold dial and sturdy case — at home on weekends, workouts and everyday errands.",
+    price: 129.99, images: [unsplash("1624124834665-eecde7bf50e7", "A black and silver chronograph watch"), unsplash("1617265860128-e23ad88cf98d", "A silver and black chronograph watch")],
+    occasions: ["birthday", "fathers-day", "graduation", "christmas"], recipients: ["him", "dad"],
+    details: [{ label: "Movement", value: "Quartz chronograph" }],
+    care: "Rinse with fresh water after exposure to salt water or sweat.",
+    addedAt: "2026-08-02",
+  }),
+
+  // ── Fashion ─────────────────────────────────────────────────────────────
+  p({
+    slug: "oxford-shirt", name: "Oxford Button-Down Shirt", sku: "RG-FSH-001", category: "fashion", subcategory: "Shirts",
+    shortDescription: "A crisp cotton Oxford for work or weekends.",
+    description: "A crisp cotton Oxford button-down with a classic fit. Dresses up with a blazer or down with chinos.",
+    price: 54.99, images: [unsplash("1602810316693-3667c854239a", "Folded blue and white button-down shirts"), unsplash("1602810318383-e386cc2a3ccf", "Button-down shirts laid out on a wooden table")],
+    occasions: ["birthday", "fathers-day", "graduation", "just-because"], recipients: ["him", "dad", "partner"],
+    options: [{ name: "Color", values: ["Sky Blue", "White"] }, { name: "Size", values: ["S", "M", "L", "XL", "XXL"] }],
+    details: [{ label: "Material", value: "Cotton Oxford cloth" }, { label: "Fit", value: "Classic" }],
+    care: "Machine wash cold, tumble dry low, warm iron.",
+    addedAt: "2026-03-05",
+  }),
+  p({
+    slug: "classic-t-shirt", name: "Classic Crew T-Shirt", sku: "RG-FSH-002", category: "fashion", subcategory: "T-shirts",
+    shortDescription: "A soft, heavyweight everyday tee.",
+    description: "A soft, heavyweight crew-neck tee with a relaxed fit — the kind of basic that gets worn every week.",
+    price: 24.99, images: [unsplash("1581655353564-df123a1eb820", "A white crew-neck t-shirt on a hanger"), unsplash("1778671394516-8270eac13c42", "A plain white t-shirt hanging on a wooden hanger")],
+    occasions: ["birthday", "just-because"], recipients: ["him", "her", "friend"],
+    options: [{ name: "Color", values: ["White", "Black"] }, { name: "Size", values: ["S", "M", "L", "XL"] }],
+    details: [{ label: "Material", value: "Cotton jersey" }, { label: "Fit", value: "Relaxed" }],
+    care: "Machine wash cold with like colors. Tumble dry low.",
+    addedAt: "2026-04-28",
+  }),
+  p({
+    slug: "casual-dress", name: "Linen Day Dress", sku: "RG-FSH-003", category: "fashion", subcategory: "Dresses",
+    shortDescription: "An easy, breathable linen-blend dress.",
+    description: "An easy, breathable linen-blend dress with a relaxed silhouette — effortless for warm days and weekend plans.",
+    price: 79.99, images: [unsplash("1747396206869-75ea57b325ce", "A woman wearing a simple linen dress")],
+    occasions: ["birthday", "just-because", "mothers-day"], recipients: ["her", "partner"],
+    options: [{ name: "Size", values: ["XS", "S", "M", "L", "XL"] }],
+    details: [{ label: "Material", value: "Linen blend" }, { label: "Fit", value: "Relaxed" }],
+    care: "Hand wash or gentle cycle cold. Line dry.",
+    addedAt: "2026-06-30",
+  }),
+
+  // ── Shoes ───────────────────────────────────────────────────────────────
+  p({
+    slug: "everyday-urban-sneaker", name: "Everyday Urban Sneaker", sku: "RG-SHO-001", category: "shoes", subcategory: "Sneakers",
+    shortDescription: "A clean white low-top for all-day comfort.",
+    description: "A clean, minimal white low-top with a cushioned insole — the sneaker that goes with everything.",
+    price: 89.99, images: [unsplash("1596744271582-1d87e9aae223", "A minimalist white sneaker on a wooden surface"), unsplash("1608379743498-ac08f6d022ba", "A pair of white leather sneakers")],
+    occasions: ["birthday", "graduation", "just-because"], recipients: ["him", "her", "partner", "friend"],
+    options: [{ name: "US Size", values: ["7", "8", "9", "10", "11", "12"] }],
+    details: [{ label: "Upper", value: "Leather-look" }, { label: "Sole", value: "Rubber" }],
+    care: "Wipe clean with a damp cloth.",
+    addedAt: "2026-02-25",
+  }),
+  p({
+    slug: "classic-casual-shoe", name: "Classic Leather Loafer", sku: "RG-SHO-002", category: "shoes", subcategory: "Casual",
+    shortDescription: "A polished brown loafer with a metal bit.",
+    description: "A polished brown loafer with a metal bit detail — smart enough for the office, relaxed enough for weekends.",
+    price: 119.99, images: [unsplash("1616406432452-07bc5938759d", "Brown leather loafers on a blue textile"), unsplash("1676121270762-47c8d3a7b9d5", "Brown suede loafers with gold hardware")],
+    occasions: ["birthday", "fathers-day", "graduation"], recipients: ["him", "dad"],
+    options: [{ name: "US Size", values: ["8", "9", "10", "11", "12"] }],
+    details: [{ label: "Upper", value: "Leather" }],
+    care: "Condition leather regularly and store with shoe trees.",
+    addedAt: "2026-05-12",
+  }),
+  p({
+    slug: "formal-dress-shoe", name: "Formal Oxford Shoe", sku: "RG-SHO-003", category: "shoes", subcategory: "Formal",
+    shortDescription: "A lace-up Oxford for the big occasions.",
+    description: "A classic lace-up Oxford with a refined profile — made for weddings, ceremonies and job interviews.",
+    price: 139.99, images: [unsplash("1603191659812-ee978eeeef76", "Brown leather lace-up dress shoes"), unsplash("1668069226492-508742b03147", "A pair of black formal shoes")],
+    occasions: ["wedding", "graduation", "fathers-day"], recipients: ["him", "dad"],
+    options: [{ name: "Color", values: ["Brown", "Black"] }, { name: "US Size", values: ["8", "9", "10", "11", "12"] }],
+    details: [{ label: "Upper", value: "Leather" }, { label: "Closure", value: "Lace-up" }],
+    care: "Polish regularly and store with shoe trees.",
+    addedAt: "2026-07-09",
+  }),
+
+  // ── Bags ────────────────────────────────────────────────────────────────
+  p({
+    slug: "classic-handbag", name: "Classic Leather Handbag", sku: "RG-BAG-001", category: "bags", subcategory: "Handbags",
+    shortDescription: "A structured brown leather handbag.",
+    description: "A structured leather handbag in a warm brown — roomy enough for the essentials, polished enough for anywhere.",
+    price: 179.99, images: [unsplash("1624687943971-e86af76d57de", "A brown leather handbag on a white table")],
+    occasions: ["birthday", "anniversary", "mothers-day", "christmas"], recipients: ["her", "mom", "partner"],
+    details: [{ label: "Material", value: "Leather" }, { label: "Closure", value: "Magnetic snap" }],
+    care: "Keep away from moisture and store stuffed to hold its shape.",
+    featured: true, addedAt: "2026-03-28",
+  }),
+  p({
+    slug: "crossbody-bag", name: "Compact Crossbody Bag", sku: "RG-BAG-002", category: "bags", subcategory: "Crossbody",
+    shortDescription: "A hands-free bag for days on the go.",
+    description: "A compact crossbody with an adjustable strap — keeps the essentials close and hands free.",
+    price: 69.99, images: [unsplash("1620786514684-ff35b5aae55e", "A black crossbody bag on a white surface"), unsplash("1604176424472-17cd740f74e9", "A white leather crossbody bag")],
+    occasions: ["birthday", "graduation", "just-because"], recipients: ["her", "friend"],
+    options: [{ name: "Color", values: ["Black", "White"] }],
+    details: [{ label: "Strap", value: "Adjustable" }],
+    care: "Wipe clean with a soft damp cloth.",
+    addedAt: "2026-06-08",
+  }),
+  p({
+    slug: "everyday-tote", name: "Everyday Canvas Tote", sku: "RG-BAG-003", category: "bags", subcategory: "Totes",
+    shortDescription: "A sturdy canvas tote for daily errands.",
+    description: "A sturdy, roomy canvas tote for groceries, books and beach days. Simple, useful and always appreciated.",
+    price: 29.99, images: [unsplash("1574365569389-a10d488ca3fb", "A natural canvas tote bag"), unsplash("1544816155-12df9643f363", "A beige reusable tote bag")],
+    occasions: ["thank-you", "housewarming", "just-because"], recipients: ["friend", "coworker", "her"],
+    details: [{ label: "Material", value: "Cotton canvas" }],
+    care: "Spot clean or hand wash cold.",
+    personalization: { label: "Printed name or initials", placeholder: "AMARA", maxLength: 12 },
+    addedAt: "2026-08-15",
+  }),
+
+  // ── Beauty & personal care ──────────────────────────────────────────────
+  p({
+    slug: "skincare-essentials-set", name: "Skincare Essentials Set", sku: "RG-BTY-001", category: "beauty", subcategory: "Skincare",
+    shortDescription: "A cleanse, treat and moisturize routine in one set.",
+    description: "A three-step routine — cleanser, serum and moisturizer — in clean, minimal packaging. A thoughtful upgrade to their everyday.",
+    price: 59.99, images: [unsplash("1631729371254-42c2892f0e6e", "Three minimal white skincare bottles"), unsplash("1601049676869-702ea24cfd58", "Skincare bottles arranged on a white textile")],
+    occasions: ["birthday", "mothers-day", "just-because", "thank-you"], recipients: ["her", "mom", "friend"],
+    details: [{ label: "Includes", value: "Cleanser, serum and moisturizer" }, { label: "Suitable for", value: "Most skin types. Patch test before use." }],
+    addedAt: "2026-04-05",
+  }),
+  p({
+    slug: "body-care-gift-box", name: "Body Care Gift Box", sku: "RG-PCR-001", category: "personal-care", subcategory: "Body care",
+    shortDescription: "Rich body cream and serum for soft, nourished skin.",
+    description: "A nourishing body care duo — rich cream and lightweight oil-serum — boxed with eucalyptus for a spa-at-home feel.",
+    price: 49.99, images: [unsplash("1785581778868-79100f7fe56c", "Skincare cream and serum with eucalyptus")],
+    occasions: ["birthday", "get-well-soon", "thank-you", "mothers-day"], recipients: ["her", "mom", "friend", "grandparent"],
+    details: [{ label: "Includes", value: "Body cream and body serum" }],
+    addedAt: "2026-05-17",
+  }),
+  p({
+    slug: "grooming-gift-set", name: "Grooming Gift Set", sku: "RG-PCR-002", category: "personal-care", subcategory: "Grooming",
+    shortDescription: "Beard oil and a brush for a sharp, cared-for look.",
+    description: "A grooming set with conditioning beard oil and a natural-bristle brush, ready to gift in a keepsake box.",
+    price: 44.99, images: [unsplash("1553265331-3032aacd1a76", "A grooming bottle beside a natural-bristle brush"), unsplash("1673350963924-cb4267d9b6eb", "A bottle of beard oil on a wooden table")],
+    occasions: ["fathers-day", "birthday", "christmas"], recipients: ["him", "dad", "partner"],
+    details: [{ label: "Includes", value: "Beard oil and grooming brush" }],
+    addedAt: "2026-06-16",
+  }),
+  p({
+    slug: "bath-essentials-set", name: "Bath Essentials Set", sku: "RG-PCR-003", category: "personal-care", subcategory: "Bath",
+    shortDescription: "Mineral bath soak and botanicals for slow evenings.",
+    description: "Mineral bath salts and botanicals in reusable glass jars — an easy way to turn any evening into a soak.",
+    price: 39.99, images: [unsplash("1550623685-2227f7bbef18", "A glass jar of white bath salts"), unsplash("1580437082423-4f0e58a2d413", "Glass jars of bath products on a floral table")],
+    occasions: ["get-well-soon", "birthday", "thank-you", "just-because"], recipients: ["her", "mom", "friend", "grandparent"],
+    details: [{ label: "Includes", value: "Bath salts and botanical soak" }],
+    addedAt: "2026-07-20",
+  }),
+
+  // ── Home & lifestyle ────────────────────────────────────────────────────
+  p({
+    slug: "scented-candle-set", name: "Scented Candle Set", sku: "RG-HOM-001", category: "home", subcategory: "Candles",
+    shortDescription: "Hand-poured candles in amber glass.",
+    description: "Hand-poured scented candles in amber glass jars — a warm, welcoming gift for a new home or a quiet night in.",
+    price: 34.99, images: [unsplash("1612293905607-b003de9e54fb", "A candle in an amber glass jar being lit with a match"), unsplash("1613068431228-8cb6a1e92573", "Lit white pillar candles with eucalyptus")],
+    occasions: ["housewarming", "thank-you", "christmas", "sympathy", "just-because"], recipients: ["her", "coworker", "friend", "couples", "family"],
+    options: [{ name: "Scent", values: ["Vanilla & Amber", "Fig & Cedar", "Fresh Linen"] }],
+    details: [{ label: "Vessel", value: "Amber glass jar" }],
+    care: "Trim the wick before each burn. Never leave a burning candle unattended.",
+    featured: true, addedAt: "2026-01-30",
+  }),
+  p({
+    slug: "photo-frame-gift", name: "Copper Photo Frame", sku: "RG-HOM-002", category: "home", subcategory: "Frames",
+    shortDescription: "A slim copper-edged frame for a favorite photo.",
+    description: "A slim frame with a warm copper edge — ready for a favorite memory on a desk, shelf or bedside table.",
+    price: 32.99, images: [unsplash("1611651525144-42027e7f45ba", "A blank photo frame with a copper border"), unsplash("1634630563477-cff9c433c608", "A white picture frame beside a vase of flowers")],
+    occasions: ["housewarming", "anniversary", "mothers-day", "christmas"], recipients: ["grandparent", "mom", "family", "couples"],
+    options: [{ name: "Size", values: ['5" × 7"', '8" × 10"'] }],
+    details: [{ label: "Stand", value: "Freestanding easel back" }],
+    addedAt: "2026-04-14",
+  }),
+
+  // ── Personalized ────────────────────────────────────────────────────────
+  p({
+    slug: "personalized-mug", name: "Personalized Mug", sku: "RG-PRS-001", category: "personalized", subcategory: "Mugs",
+    shortDescription: "A ceramic mug printed with a name or message.",
+    description: "A classic ceramic mug printed with the name or short message of your choice — a daily reminder of you.",
+    price: 22.99, images: [unsplash("1570784332176-fdd73da66f03", "A white ceramic mug on a table"), unsplash("1616241673111-508b4662c707", "A white ceramic mug by a window")],
+    occasions: ["birthday", "thank-you", "fathers-day", "mothers-day", "just-because"], recipients: ["coworker", "friend", "dad", "mom", "grandparent"],
+    personalization: { label: "Name or message", placeholder: "World's Best Dad", maxLength: 24 },
+    details: [{ label: "Material", value: "Ceramic" }],
+    care: "Dishwasher safe on the top rack. Not for use in the microwave with metallic print.",
+    addedAt: "2026-02-08",
+  }),
+  p({
+    slug: "custom-photo-frame", name: "Custom Engraved Photo Frame", sku: "RG-PRS-002", category: "personalized", subcategory: "Photo gifts",
+    shortDescription: "A wood frame engraved with your words.",
+    description: "A natural wood frame engraved with a name, date or short message — the perfect home for a shared memory.",
+    price: 39.99, images: [unsplash("1634969948017-a9abffad732f", "A wooden frame holding a black and white photo"), unsplash("1602669244516-c776473355fe", "A wooden picture frame on a white textile")],
+    occasions: ["anniversary", "wedding", "mothers-day", "fathers-day", "new-baby"], recipients: ["grandparent", "couples", "mom", "dad", "family"],
+    personalization: { label: "Engraving text", placeholder: "The Okafors · Est. 2019", maxLength: 30 },
+    details: [{ label: "Material", value: "Natural wood" }],
+    addedAt: "2026-05-25",
+  }),
+  p({
+    slug: "engraved-gift", name: "Engraved Keepsake Box", sku: "RG-PRS-003", category: "personalized", subcategory: "Engraved gifts",
+    shortDescription: "A carved wooden box for treasured keepsakes.",
+    description: "A carved wooden keepsake box, engraved with initials or a short message, for letters, jewelry and small treasures.",
+    price: 49.99, images: [unsplash("1672664003230-106aa4f534c7", "A carved wooden keepsake box on a table"), unsplash("1773308640987-1bccc096cd65", "A wooden box engraved with text")],
+    occasions: ["anniversary", "wedding", "graduation", "engagement"], recipients: ["partner", "couples", "her", "him"],
+    personalization: { label: "Engraving text", placeholder: "J & T · 06.14.2026", maxLength: 24 },
+    details: [{ label: "Material", value: "Wood" }],
+    addedAt: "2026-07-25",
+  }),
+  p({
+    slug: "greeting-card", name: "Handwritten Greeting Card", sku: "RG-PRS-004", category: "personalized", subcategory: "Cards",
+    shortDescription: "Your message, handwritten on a premium card.",
+    description: "Tell us what to say and we'll handwrite your message on a premium card to include with their gift.",
+    price: 6.99, images: [unsplash("1554894872-1a01c75f7513", "A greeting card with a floral illustration and envelope"), unsplash("1723398840367-4d1993648a6a", "An open cream-colored envelope")],
+    occasions: ["birthday", "anniversary", "thank-you", "sympathy", "get-well-soon", "just-because"], recipients: ["her", "him", "mom", "dad", "friend", "family", "coworker"],
+    personalization: { label: "Card message", placeholder: "Thinking of you today…", maxLength: 200 },
+    giftWrap: false, sameDayEligible: true, addedAt: "2026-01-05",
+  }),
+
+  // ── Electronics ─────────────────────────────────────────────────────────
+  p({
+    slug: "wireless-earbuds", name: "Wireless Earbuds", sku: "RG-ELC-001", category: "electronics", subcategory: "Audio",
+    shortDescription: "True wireless earbuds with a charging case.",
+    description: "Compact true wireless earbuds with a pocket-size charging case — for commutes, workouts and calls.",
+    price: 69.99, images: [unsplash("1606220588913-b3aacb4d2f46", "Black wireless earbuds on a red background")],
+    occasions: ["birthday", "graduation", "christmas"], recipients: ["him", "her", "kids", "friend"],
+    details: [{ label: "Connectivity", value: "Bluetooth" }, { label: "Includes", value: "Charging case and USB-C cable" }],
+    giftWrap: true, addedAt: "2026-03-18",
+  }),
+  p({
+    slug: "bluetooth-speaker", name: "Portable Bluetooth Speaker", sku: "RG-ELC-002", category: "electronics", subcategory: "Audio",
+    shortDescription: "A compact speaker with surprisingly full sound.",
+    description: "A compact, fabric-wrapped Bluetooth speaker that fills a room — at home, at the park or on the go.",
+    price: 59.99, images: [unsplash("1582978571763-2d039e56f0c3", "A small white portable speaker on a wooden table"), unsplash("1547052178-7f2c5a20c332", "A gray portable speaker on a white surface")],
+    occasions: ["birthday", "graduation", "housewarming", "christmas"], recipients: ["him", "friend", "kids", "family"],
+    details: [{ label: "Connectivity", value: "Bluetooth" }, { label: "Charging", value: "Rechargeable via USB-C" }],
+    addedAt: "2026-06-25",
+  }),
+  p({
+    slug: "power-bank", name: "Slim Power Bank", sku: "RG-ELC-003", category: "electronics", subcategory: "Accessories",
+    shortDescription: "A slim portable charger for phones on the go.",
+    description: "A slim aluminum power bank that slips into a pocket or bag, so their phone never runs out on a busy day.",
+    price: 34.99, images: [unsplash("1706275399494-fb26bbc5da63", "A silver power bank on a white table"), unsplash("1566554738544-d962991c3fee", "A power bank charging a smartphone")],
+    occasions: ["graduation", "birthday", "thank-you", "christmas"], recipients: ["him", "her", "coworker", "friend"],
+    details: [{ label: "Ports", value: "USB-C" }, { label: "Finish", value: "Aluminum" }],
+    addedAt: "2026-08-10",
+  }),
+
+  // ── Baby & kids ─────────────────────────────────────────────────────────
+  p({
+    slug: "baby-gift-hamper", name: "New Baby Gift Hamper", sku: "RG-BBY-001", category: "baby-kids", subcategory: "Baby",
+    shortDescription: "Soft essentials to welcome a new arrival.",
+    description: "A sweet hamper of soft baby essentials — clothing, a blanket and keepsakes — to welcome the newest member of the family.",
+    price: 94.99, images: [unsplash("1635874714425-c342060a4c58", "A baby gift hamper with its contents laid out"), unsplash("1768693602418-260d828b878d", "Baby clothes in a woven basket")],
+    occasions: ["new-baby", "baby-shower"], recipients: ["family", "kids", "couples"],
+    options: [{ name: "Size", values: ["Newborn", "0–3 months", "3–6 months"] }],
+    details: [{ label: "Includes", value: "Baby clothing, blanket and keepsakes" }],
+    care: "Wash clothing before first wear.",
+    featured: true, addedAt: "2026-02-28",
+  }),
+  p({
+    slug: "soft-toy-gift", name: "Classic Teddy Bear", sku: "RG-BBY-002", category: "baby-kids", subcategory: "Toys",
+    shortDescription: "A huggable plush bear with a ribbon bow.",
+    description: "A huggable plush teddy bear with a ribbon bow — a forever friend for little ones and a sweet gesture for anyone.",
+    price: 29.99, images: [unsplash("1556012018-50c5c0da73bf", "A brown teddy bear with a red bow"), unsplash("1602734846297-9299fc2d4703", "A brown teddy bear with a bow tie")],
+    occasions: ["new-baby", "baby-shower", "valentines-day", "get-well-soon", "birthday"], recipients: ["kids", "her", "partner"],
+    details: [{ label: "Material", value: "Plush" }, { label: "Age", value: "Suitable from birth" }],
+    care: "Surface wash only.",
+    sameDayEligible: true, addedAt: "2026-04-26",
+  }),
+  p({
+    slug: "storybook-set", name: "Storybook Set", sku: "RG-BBY-003", category: "baby-kids", subcategory: "Books",
+    shortDescription: "A stack of picture books for bedtime stories.",
+    description: "A curated stack of picture books for bedtime stories and quiet afternoons — gifts that grow with them.",
+    price: 39.99, images: [unsplash("1455884981818-54cb785db6fc", "A pile of colorful children's storybooks")],
+    occasions: ["birthday", "christmas", "new-baby"], recipients: ["kids", "family"],
+    options: [{ name: "Age range", values: ["0–3 years", "3–6 years", "6–9 years"] }],
+    details: [{ label: "Includes", value: "Assorted picture books" }],
+    addedAt: "2026-07-05",
+  }),
+
+  // ── Food & treats ───────────────────────────────────────────────────────
+  p({
+    slug: "premium-food-hamper", name: "Gourmet Food Hamper", sku: "RG-FOD-001", category: "food", subcategory: "Hampers",
+    shortDescription: "Fruit, cookies, cheese and treats in a gift crate.",
+    description: "A generous gourmet crate of fresh fruit, cookies, cheese and sweet treats — made for sharing with the whole household.",
+    price: 129.99, images: [unsplash("1773450935809-512f3b662fe1", "A gourmet food gift box with fruits, cookies and cheese"), unsplash("1773450970981-793e2d72d820", "A gourmet gift box with assorted treats and fruits")],
+    occasions: ["housewarming", "thank-you", "christmas", "sympathy", "congratulations"], recipients: ["family", "coworker", "couples", "grandparent"],
+    details: [{ label: "Allergens", value: "Contains milk, wheat and nuts." }, { label: "Storage", value: "Refrigerate fresh items on arrival." }],
+    sameDayEligible: true, featured: true, addedAt: "2026-03-01",
+  }),
+
+  // ── American classics ───────────────────────────────────────────────────
+  p({
+    slug: "new-york-cheesecake", name: "New York Cheesecake", sku: "RG-AMR-001", category: "american-classics", subcategory: "Desserts",
+    shortDescription: "Rich, dense and creamy, with a graham cracker crust.",
+    description: "A classic New York-style cheesecake — rich, dense and silky, baked on a buttery graham cracker crust. A crowd-pleasing centerpiece for birthdays and celebrations.",
+    price: 49.99, images: [unsplash("1676300185983-d5f242babe34", "A slice of cheesecake with strawberry topping"), unsplash("1635327173758-85badf17f995", "A slice of New York-style cheesecake on a green plate")],
+    occasions: ["birthday", "thank-you", "congratulations", "just-because"], recipients: ["family", "friend", "coworker", "dad", "mom"],
+    options: [{ name: "Size", values: ['6" (serves 6–8)', '9" (serves 12–14)'] }],
+    details: [{ label: "Allergens", value: "Contains milk, eggs and wheat." }, { label: "Storage", value: "Keep refrigerated. Best enjoyed within 4 days." }],
+    sameDayEligible: true, featured: true, addedAt: "2026-08-20",
+  }),
+  p({
+    slug: "southern-pecan-pie", name: "Southern Pecan Pie", sku: "RG-AMR-002", category: "american-classics", subcategory: "Pies",
+    shortDescription: "A golden, nutty Southern classic in a flaky crust.",
+    description: "Toasted pecans set in a rich, buttery caramel filling with a flaky crust — the Southern classic that belongs on every holiday table.",
+    price: 44.99, images: [unsplash("1593307744921-00b909a78419", "A whole pecan pie on a white plate"), unsplash("1619051805375-7b83440bb11b", "A pecan pie seen from above")],
+    occasions: ["thank-you", "housewarming", "christmas", "just-because"], recipients: ["family", "grandparent", "dad", "coworker"],
+    details: [{ label: "Allergens", value: "Contains pecans (tree nuts), wheat, milk and eggs." }, { label: "Storage", value: "Keep cool. Best enjoyed within 4 days." }],
+    sameDayEligible: true, addedAt: "2026-09-01",
+  }),
+  p({
+    slug: "classic-apple-pie", name: "Classic Lattice Apple Pie", sku: "RG-AMR-003", category: "american-classics", subcategory: "Pies",
+    shortDescription: "Cinnamon-spiced apples under a golden lattice crust.",
+    description: "As American as it gets: tender cinnamon-spiced apples baked under a hand-woven golden lattice crust. Warm, comforting and made for sharing.",
+    price: 39.99, images: [unsplash("1600626336477-96e4ee89a052", "A lattice-top apple pie on a wooden table"), unsplash("1790884528568-a751f9afe34d", "A person holding a freshly baked lattice pie")],
+    occasions: ["housewarming", "thank-you", "get-well-soon", "just-because"], recipients: ["family", "grandparent", "friend", "couples"],
+    details: [{ label: "Allergens", value: "Contains wheat and milk." }, { label: "Storage", value: "Keep cool. Best enjoyed within 3 days." }],
+    sameDayEligible: true, addedAt: "2026-09-05",
+  }),
+  p({
+    slug: "gourmet-popcorn-tin", name: "Gourmet Popcorn Tin", sku: "RG-AMR-004", category: "american-classics", subcategory: "Snacks",
+    shortDescription: "Butter, caramel and cheddar popcorn for movie night.",
+    description: "A gift tin of freshly popped gourmet popcorn in three all-American flavors — butter, caramel and cheddar. Made for movie nights and shared snacking.",
+    price: 29.99, images: [unsplash("1512149177596-f817c7ef5d4c", "A bowl of freshly popped popcorn"), unsplash("1578849278619-e73505e9610f", "Close-up of fluffy popcorn")],
+    occasions: ["thank-you", "birthday", "christmas", "just-because"], recipients: ["family", "friend", "coworker", "kids"],
+    options: [{ name: "Flavors", values: ["Butter, Caramel & Cheddar", "Caramel only"] }],
+    details: [{ label: "Allergens", value: "Contains milk. Made in a facility that handles nuts." }, { label: "Storage", value: "Keep sealed in a cool, dry place." }],
+    addedAt: "2026-09-08",
+  }),
+];
+
+/**
+ * Curated bundles. The bundle price is the exact sum of its items — no savings
+ * are claimed until the business sets genuine bundle pricing.
+ */
+const BUNDLES: Array<Omit<Input, "price"> & { bundleItems: string[] }> = [
+  {
+    slug: "birthday-bundle", name: "The Birthday Bundle", sku: "RG-BND-001", category: "gift-boxes", subcategory: "Bundles",
+    shortDescription: "Cake, chocolates, flowers and a card — the full celebration.",
+    description: "Everything a birthday needs in one order: a chocolate cake, premium chocolates, a seasonal bouquet and a handwritten card.",
+    images: [unsplash("1545696563-af8f6ec2295a", "Candles being lit on a birthday cake")],
+    bundleItems: ["classic-chocolate-cake", "premium-chocolate-box", "mixed-seasonal-bouquet", "greeting-card"],
+    occasions: ["birthday"], recipients: ["her", "him", "family", "friend", "partner"], sameDayEligible: true, featured: true, addedAt: "2026-09-10",
+  },
+  {
+    slug: "self-care-bundle", name: "The Self-Care Bundle", sku: "RG-BND-002", category: "gift-boxes", subcategory: "Bundles",
+    shortDescription: "A candle, body care and chocolate for a slow evening.",
+    description: "A calm night in, delivered: a scented candle set, a body care box and premium chocolates.",
+    images: [unsplash("1778333485565-416699e6d645", "A scented candle in an open gift box")],
+    bundleItems: ["scented-candle-set", "body-care-gift-box", "premium-chocolate-box"],
+    occasions: ["get-well-soon", "just-because", "mothers-day", "birthday"], recipients: ["her", "mom", "friend"], addedAt: "2026-09-10",
+  },
+  {
+    slug: "anniversary-bundle", name: "The Anniversary Bundle", sku: "RG-BND-003", category: "gift-boxes", subcategory: "Bundles",
+    shortDescription: "Red roses, chocolates and an engraved keepsake.",
+    description: "Red roses, premium chocolates and an engraved keepsake box to mark the years together.",
+    images: [unsplash("1616688921235-118d6ee32bdf", "A person holding a bouquet of red roses")],
+    bundleItems: ["classic-red-rose-bouquet", "premium-chocolate-box", "engraved-gift"],
+    occasions: ["anniversary", "valentines-day"], recipients: ["partner", "her", "couples"], sameDayEligible: true, featured: true, addedAt: "2026-09-12",
+  },
+  {
+    slug: "for-him-bundle", name: "The Gentleman's Bundle", sku: "RG-BND-004", category: "gift-boxes", subcategory: "Bundles",
+    shortDescription: "A classic watch, grooming set and handwritten card.",
+    description: "A classic analog watch, a grooming gift set and a handwritten card — a polished gift for the man who has everything.",
+    images: [unsplash("1556597130-ef7aa3c71ff5", "A silver analog watch with a brown leather strap")],
+    bundleItems: ["classic-analog-watch", "grooming-gift-set", "greeting-card"],
+    occasions: ["fathers-day", "birthday", "anniversary"], recipients: ["him", "dad", "partner"], addedAt: "2026-09-14",
+  },
+  {
+    slug: "for-her-bundle", name: "The Treat-Her Bundle", sku: "RG-BND-005", category: "gift-boxes", subcategory: "Bundles",
+    shortDescription: "A pendant necklace, floral fragrance and chocolates.",
+    description: "A pendant necklace, a floral fragrance and premium chocolates — a little luxury, beautifully put together.",
+    images: [unsplash("1599643477877-530eb83abc8e", "A pendant necklace with a faceted green stone")],
+    bundleItems: ["pendant-necklace", "floral-fragrance", "premium-chocolate-box"],
+    occasions: ["birthday", "anniversary", "valentines-day", "mothers-day"], recipients: ["her", "partner", "mom"], addedAt: "2026-09-14",
+  },
+  {
+    slug: "long-distance-love-bundle", name: "The Long-Distance Love Bundle", sku: "RG-BND-006", category: "gift-boxes", subcategory: "Bundles",
+    shortDescription: "Flowers, a framed memory, a sweet treat and your words.",
+    description: "For the people you miss most: pink roses, a custom engraved photo frame, a box of macarons and a handwritten card with your message.",
+    images: [unsplash("1680563094046-5d846e2c59d1", "A bouquet of pink roses wrapped in pink paper")],
+    bundleItems: ["pink-rose-bouquet", "custom-photo-frame", "sweet-treat-box", "greeting-card"],
+    occasions: ["just-because", "anniversary", "valentines-day", "birthday"], recipients: ["partner", "mom", "family", "friend"], sameDayEligible: true, featured: true, addedAt: "2026-09-16",
+  },
+];
+
+const bySlug = new Map(STARTER_PRODUCTS.map((item) => [item.slug, item]));
+
+export const STARTER_BUNDLES: Product[] = BUNDLES.map((bundle) => {
+  const items = bundle.bundleItems.map((slug) => {
+    const item = bySlug.get(slug);
+    if (!item) throw new Error(`Bundle ${bundle.slug} references unknown product ${slug}`);
+    return item;
+  });
+  const price = Math.round(items.reduce((sum, item) => sum + item.price, 0) * 100) / 100;
+  return p({
+    ...bundle,
+    price,
+    details: [{ label: "Includes", value: items.map((item) => item.name).join(", ") }],
+    sameDayEligible: items.every((item) => item.sameDayEligible),
+  });
+});
+
+export const STARTER_CATALOG: Product[] = [...STARTER_PRODUCTS, ...STARTER_BUNDLES];

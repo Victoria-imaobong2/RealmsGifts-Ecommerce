@@ -1,0 +1,17 @@
+{
+  "name": "Realmsgifts",
+  "short_name": "Realmsgifts",
+  "description": "Thoughtful gifts. Wherever they are.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF7F0",
+  "theme_color": "#173F35",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

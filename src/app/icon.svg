@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="112" fill="#173F35"/>
+  <!-- Gift box -->
+  <rect x="128" y="236" width="256" height="172" rx="14" stroke="#FAF7F0" stroke-width="22"/>
+  <rect x="108" y="184" width="296" height="62" rx="14" stroke="#FAF7F0" stroke-width="22"/>
+  <path d="M256 184v224" stroke="#C7A568" stroke-width="22"/>
+  <!-- Bow -->
+  <path d="M256 184c-26-58-102-64-102-22 0 26 50 22 102 22zM256 184c26-58 102-64 102-22 0 26-50 22-102 22z" stroke="#C7A568" stroke-width="20" stroke-linejoin="round"/>
+</svg>
