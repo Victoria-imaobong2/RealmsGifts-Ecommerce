@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Alert, Field, Input } from "@/components/ui/primitives";
@@ -11,7 +11,6 @@ function safeRedirect(value: string | null) {
 }
 
 function CustomerAuth({ redirect }: { redirect: string }) {
-  const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -24,53 +23,26 @@ function CustomerAuth({ redirect }: { redirect: string }) {
     setState({ status: "loading" });
 
     try {
-      if (isSignUp) {
-        // 1. Customer Sign Up
-        const registerRes = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
-        });
-        const registerData = await registerRes.json();
+      const endpoint = isSignUp ? "/api/auth/register" : "/api/auth/login";
+      const body = isSignUp ? { name, email, password } : { email, password };
 
-        if (!registerRes.ok) {
-          setState({ status: "error", message: registerData.error || "Failed to create account." });
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        if (data.role === "ADMIN") {
+          window.location.href = "/admin";
           return;
         }
-
-        // Auto sign-in on registration success
-        const loginRes = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-
-        if (loginRes.ok) {
-          router.push(redirect);
-          router.refresh();
-        } else {
-          setIsSignUp(false);
-          setState({ status: "error", message: "Account created! Please sign in with your password." });
-        }
+        // Direct window navigation forces Next.js Server Components to re-evaluate cookies immediately
+        window.location.href = redirect;
       } else {
-        // 2. Customer Sign In
-        const res = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        const data = await res.json();
-
-        if (res.ok) {
-          if (data.role === "ADMIN") {
-            window.location.href = "/admin";
-            return;
-          }
-          router.push(redirect);
-          router.refresh();
-        } else {
-          setState({ status: "error", message: data.error || "Invalid email or password." });
-        }
+        setState({ status: "error", message: data.error || "Authentication failed." });
       }
     } catch {
       setState({ status: "error", message: "We couldn't connect. Please try again." });
@@ -186,14 +158,13 @@ function StaffSignIn() {
           const data = await res.json();
 
           if (res.ok) {
-            // Hard redirect to clear session state and load /admin dashboard
             window.location.href = "/admin";
             return;
           } else {
             setError(data.error || "Incorrect staff password.");
           }
         } catch {
-          setError("Network error. Please check your connection.");
+          setError("Network error. Please try again.");
         } finally {
           setLoading(false);
         }

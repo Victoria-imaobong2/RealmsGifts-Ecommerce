@@ -6,7 +6,7 @@ import { safeEqual } from "@/lib/auth";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
-  // 1. Apply Rate Limiting (5 attempts per 10 mins)
+  // 1. Rate Limiting (5 attempts per 10 mins per IP)
   if (!rateLimit(`login:${clientIp(req)}`, 5, 10 * 60_000)) {
     return NextResponse.json(
       { error: "Too many attempts. Please try again later." },
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     const adminSecret = process.env.ADMIN_SECRET_KEY;
 
-    // 2. Staff Sign-In (Checks password against ADMIN_SECRET_KEY directly)
+    // 2. Staff Authentication (Checks password against ADMIN_SECRET_KEY)
     if (adminSecret && typeof password === "string" && safeEqual(password, adminSecret)) {
       const cookieStore = await cookies();
       cookieStore.set("admin_session", adminSecret, {
@@ -30,13 +30,13 @@ export async function POST(req: Request) {
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         path: "/",
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 60 * 60 * 24 * 7, // 7 days
       });
 
       return NextResponse.json({ success: true, role: "ADMIN" });
     }
 
-    // 3. Customer Sign-In (Requires both email and password)
+    // 3. Customer Authentication
     if (!email || !password) {
       return NextResponse.json(
         { error: "Please enter your email address and password." },
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
     return NextResponse.json({
