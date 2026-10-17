@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { cookies } from "next/headers";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 
+export const CUSTOMER_COOKIE = "customer_session";
 export const SESSION_COOKIE = "rg_session";
 const SESSION_TTL_DAYS = 30;
 export const LOGIN_TOKEN_TTL_MINUTES = 20;
@@ -35,8 +36,27 @@ export const isValidEmail = (email: string) =>
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (!isDatabaseConfigured()) return null;
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  
+  const cookieStore = await cookies();
+  
+  // 1. Direct Customer Session lookup (stores user.id directly)
+  const customerUserId = cookieStore.get(CUSTOMER_COOKIE)?.value;
+  if (customerUserId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: customerUserId },
+        select: { id: true, email: true, name: true, role: true },
+      });
+      if (user) return user;
+    } catch (error) {
+      console.error("[auth] Direct customer lookup failed:", error);
+    }
+  }
+
+  // 2. Token-based Session lookup (fallback)
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
+
   try {
     const session = await prisma.session.findUnique({
       where: { tokenHash: hashToken(token) },
@@ -53,8 +73,17 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 export async function startSession(userId: string) {
   const token = newToken();
   const expiresAt = new Date(Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000);
-  await prisma.session.create({ data: { userId, tokenHash: hashToken(token), expiresAt } });
-  (await cookies()).set(SESSION_COOKIE, token, {
+  await prisma.session.create({ data: { userId, tokenHash: hashToken(token), expiresAt } }).catch(() => undefined);
+  
+  const store = await cookies();
+  store.set(CUSTOMER_COOKIE, userId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: expiresAt,
+  });
+  store.set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -69,6 +98,7 @@ export async function endSession() {
   if (token && isDatabaseConfigured()) {
     await prisma.session.deleteMany({ where: { tokenHash: hashToken(token) } }).catch(() => undefined);
   }
+  store.delete(CUSTOMER_COOKIE);
   store.delete(SESSION_COOKIE);
 }
 
