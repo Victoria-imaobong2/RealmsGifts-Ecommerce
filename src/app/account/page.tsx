@@ -123,7 +123,7 @@ export default async function AccountPage() {
               <dt className="text-muted">Email</dt>
               <dd className="text-ink">{user.email}</dd>
               <dt className="text-muted">Sign-in method</dt>
-              <dd className="text-ink">Secure email link (no password stored)</dd>
+              <dd className="text-ink">Email and Password</dd>
             </dl>
             <p className="mt-4 text-xs text-muted">Need to change your email or delete your account? <Link href="/contact" className="text-forest hover:underline">Contact us</Link>.</p>
           </section>
