@@ -12,6 +12,7 @@ enum Role {
   USER
   ADMIN
   SUPPORT
+  CUSTOMER
 }
 
 enum DeliveryType {
@@ -38,12 +39,14 @@ model User {
   id         String         @id @default(cuid())
   email      String         @unique
   name       String?
+  password   String?
   role       Role           @default(USER)
   orders     Order[]
   sessions   Session[]
   recipients Recipient[]
   wishlist   WishlistItem[]
   createdAt  DateTime       @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Passwordless sign-in: a single-use, short-lived token emailed to the user.
