@@ -35,7 +35,6 @@ const iconButton =
 
 function MegaMenu({ label, href, items, columns }: { label: string; href: string; items: { href: string; label: string }[]; columns: number }) {
   return (
-    // Positioned against the full-width nav bar (not this item) so it never runs off-screen.
     <div className="group">
       <Link
         href={href}
@@ -45,7 +44,9 @@ function MegaMenu({ label, href, items, columns }: { label: string; href: string
         {label}
         <ChevronDown size={14} aria-hidden className="transition group-hover:rotate-180 group-focus-within:rotate-180" />
       </Link>
-      <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 translate-y-1 pt-2 opacity-0 transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+      
+      {/* Added pointer-events-none by default, pointer-events-auto when group is hovered/focused */}
+      <div className="invisible pointer-events-none absolute left-1/2 top-full z-50 -translate-x-1/2 translate-y-1 pt-2 opacity-0 transition duration-200 group-hover:visible group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
         <ul
           className="grid gap-x-8 gap-y-1 rounded-2xl border border-line bg-white p-6 shadow-[var(--shadow-overlay)]"
           style={{ gridTemplateColumns: `repeat(${columns}, minmax(11rem, 1fr))` }}

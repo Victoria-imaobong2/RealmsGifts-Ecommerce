@@ -92,7 +92,7 @@ export default async function AccountPage() {
         <div className="space-y-8">
           
           {/* Section 1: Orders */}
-          <section id="orders" className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm scroll-mt-24">
+          <section id="orders" className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm scroll-mt-28">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-serif text-slate-900 font-bold">My Orders & Gift History</h2>
@@ -151,7 +151,7 @@ export default async function AccountPage() {
           </section>
 
           {/* Section 2: Recipients */}
-          <section id="recipients" className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm scroll-mt-24">
+          <section id="recipients" className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm scroll-mt-28">
             <div className="mb-6">
               <h2 className="text-xl font-serif text-slate-900 font-bold">Saved Recipients</h2>
               <p className="text-xs text-slate-500 mt-0.5">Save addresses for Mom, Dad, or partners to check out faster.</p>
@@ -170,7 +170,7 @@ export default async function AccountPage() {
           </section>
 
           {/* Section 3: Account Settings */}
-          <section id="settings" className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm scroll-mt-24">
+          <section id="settings" className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm scroll-mt-28">
             <h2 className="text-xl font-serif text-slate-900 font-bold mb-4">Account Settings</h2>
             
             <div className="divide-y divide-slate-100 text-xs">
