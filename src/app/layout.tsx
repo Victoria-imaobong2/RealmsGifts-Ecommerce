@@ -3,7 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { SITE } from "@/config/site";
 import { CartDrawer } from "@/components/cart/CartDrawer";
-import { SupportButton, Toaster, WishlistSync } from "@/components/layout/ClientChrome";
+import { DeliveryBanner, SupportButton, Toaster, WishlistSync } from "@/components/layout/ClientChrome";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MobileMenu } from "@/components/layout/MobileMenu";
@@ -49,6 +49,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <div className="on-dark bg-forest-dark px-4 py-2 text-center text-xs tracking-[0.08em] text-ivory">
           {SITE.announcement}
         </div>
+        <DeliveryBanner />
         <Header />
         <main id="main" className="flex-1">
           {children}
