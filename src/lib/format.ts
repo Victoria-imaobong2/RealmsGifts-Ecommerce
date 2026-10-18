@@ -3,7 +3,7 @@ import type { CurrencyCode } from "@/lib/catalog/types";
 const moneyFormatters = new Map<string, Intl.NumberFormat>();
 
 /** Formats an amount in major units, e.g. formatMoney(49.99) → "$49.99". */
-export function formatMoney(amount: number, currency: CurrencyCode | string = "USD", locale = "en-US"): string {
+export function formatMoney(amount: number, currency: CurrencyCode | string = "NGN", locale = "en-NG"): string {
   const key = `${locale}:${currency}`;
   let formatter = moneyFormatters.get(key);
   if (!formatter) {
@@ -14,7 +14,7 @@ export function formatMoney(amount: number, currency: CurrencyCode | string = "U
 }
 
 export function formatDate(date: Date | string, options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" }) {
-  return new Intl.DateTimeFormat("en-US", options).format(typeof date === "string" ? new Date(date) : date);
+  return new Intl.DateTimeFormat("en-NG", options).format(typeof date === "string" ? new Date(date) : date);
 }
 
 export function formatDateRange(from: Date, to: Date) {

@@ -134,7 +134,7 @@ model Order {
   customerName    String?
   customerPhone   String?
   status          OrderStatus  @default(PENDING)
-  currency        String       @default("USD")
+  currency        String       @default("Naira")
   subtotal        Float?
   shippingFee     Float?
   giftWrapFee     Float?
