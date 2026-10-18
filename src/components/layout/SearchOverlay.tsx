@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Loader2, Search, X } from "lucide-react";
 import type { ProductSummary } from "@/lib/catalog/types";
-import type { Budget, Category, Occasion, Recipient } from "@/lib/catalog/taxonomy";
+import type { BUDGETS, Category, Occasion, Recipient, BudgetOption } from "@/lib/catalog/taxonomy";
 import { formatMoney } from "@/lib/format";
 import { useDialog } from "@/lib/hooks";
 import { useUiStore } from "@/store/useUiStore";
@@ -16,7 +16,7 @@ const POPULAR = ["Birthday", "Mom", "Perfume", "Chocolate", "Jewelry", "Gift box
 interface Results {
   total: number;
   products: ProductSummary[];
-  suggestions?: { categories: Category[]; occasions: Occasion[]; recipients: Recipient[]; budgets: Budget[] };
+  suggestions?: { categories: Category[]; occasions: Occasion[]; recipients: Recipient[]; budgets: BudgetOption[] };
 }
 
 export function SearchOverlay() {
