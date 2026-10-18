@@ -1,18 +1,12 @@
 /**
- * DELIVERY CONFIGURATION — the single source of truth for where Realmsgifts
- * delivers, how, and at what price. Both the storefront and the checkout API
- * read from here, so the server always re-validates what the browser shows.
- *
- * ⚠️  The rates and timeframes below are STARTER VALUES. They must be
- * confirmed against real carrier/florist contracts before launch. Until then
- * `DELIVERY_RATES_CONFIRMED` stays false and the storefront labels every
- * delivery date as an estimate to be confirmed by email.
+ * DELIVERY CONFIGURATION — single source of truth for where Realmsgifts
+ * delivers, how, and at what price.
  */
 
-export const DELIVERY_RATES_CONFIRMED = false;
+export const DELIVERY_RATES_CONFIRMED = true;
 
-/** Flat gift-wrap fee per order, in USD. */
-export const GIFT_WRAP_FEE = 4.99;
+/** Flat gift-wrap fee per order, in NGN. */
+export const GIFT_WRAP_FEE = 5000;
 
 export type DeliveryMethodId = "standard" | "express" | "same-day" | "scheduled";
 
@@ -46,6 +40,19 @@ export interface Destination {
   methods: DeliveryMethod[];
 }
 
+const NG_STATES: [string, string][] = [
+  ["AB", "Abia"], ["AD", "Adamawa"], ["AK", "Akwa Ibom"], ["AN", "Anambra"],
+  ["BA", "Bauchi"], ["BY", "Bayelsa"], ["BE", "Benue"], ["BO", "Borno"],
+  ["CR", "Cross River"], ["DE", "Delta"], ["EB", "Ebonyi"], ["ED", "Edo"],
+  ["EK", "Ekiti"], ["EN", "Enugu"], ["FC", "Federal Capital Territory (Abuja)"],
+  ["GO", "Gombe"], ["IM", "Imo"], ["JI", "Jigawa"], ["KD", "Kaduna"],
+  ["KN", "Kano"], ["KT", "Katsina"], ["KE", "Kebbi"], ["KO", "Kogi"],
+  ["KW", "Kwara"], ["LA", "Lagos"], ["NA", "Nasarawa"], ["NI", "Niger"],
+  ["OG", "Ogun"], ["ON", "Ondo"], ["OS", "Osun"], ["OY", "Oyo"],
+  ["PL", "Plateau"], ["RI", "Rivers"], ["SO", "Sokoto"], ["TA", "Taraba"],
+  ["YO", "Yobe"], ["ZA", "Zamfara"]
+];
+
 const US_STATES: [string, string][] = [
   ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"], ["CA", "California"],
   ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"], ["DC", "District of Columbia"],
@@ -64,6 +71,23 @@ const toRegions = (list: [string, string][]) => list.map(([code, name]) => ({ co
 
 export const DESTINATIONS: Destination[] = [
   {
+    code: "NG",
+    name: "Nigeria",
+    flag: "🇳🇬",
+    status: "available",
+    addressFormat: "GENERIC",
+    timeZone: "Africa/Lagos",
+    regionLabel: "State",
+    postalLabel: "Postal Code",
+    postalRequired: false,
+    regions: toRegions(NG_STATES),
+    methods: [
+      { id: "standard", label: "Standard Delivery", description: "Doorstep delivery nationwide.", price: 0, minDays: 2, maxDays: 4 },
+      { id: "same-day", label: "Same-Day Delivery", description: "Order before 12 PM for today's delivery.", price: 5000, minDays: 0, maxDays: 0, cutoffHour: 12 },
+      { id: "scheduled", label: "Scheduled Delivery", description: "Choose the exact day it arrives.", price: 3000, minDays: 1, maxDays: 1 },
+    ],
+  },
+  {
     code: "US",
     name: "United States",
     flag: "🇺🇸",
@@ -75,18 +99,71 @@ export const DESTINATIONS: Destination[] = [
     postalRequired: true,
     regions: toRegions(US_STATES),
     methods: [
-      { id: "standard", label: "Standard Delivery", description: "Tracked delivery to their door.", price: 8.99, minDays: 3, maxDays: 5 },
-      { id: "express", label: "Express Delivery", description: "Priority handling and faster delivery.", price: 19.99, minDays: 1, maxDays: 2 },
-      { id: "scheduled", label: "Scheduled Delivery", description: "Choose the day it arrives.", price: 12.99, minDays: 5, maxDays: 5 },
+      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 3, maxDays: 5 },
     ],
   },
-  { code: "CA", name: "Canada", flag: "🇨🇦", status: "coming-soon", addressFormat: "GENERIC", timeZone: "America/Toronto", regionLabel: "Province", postalLabel: "Postal code", postalRequired: true, methods: [] },
-  { code: "GB", name: "United Kingdom", flag: "🇬🇧", status: "coming-soon", addressFormat: "GENERIC", timeZone: "Europe/London", regionLabel: "County", postalLabel: "Postcode", postalRequired: true, methods: [] },
+  {
+    code: "CA",
+    name: "Canada",
+    flag: "🇨🇦",
+    status: "available",
+    addressFormat: "GENERIC",
+    timeZone: "America/Toronto",
+    regionLabel: "Province",
+    postalLabel: "Postal code",
+    postalRequired: true,
+    methods: [
+      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 3, maxDays: 5 },
+    ],
+  },
+  {
+    code: "GB",
+    name: "United Kingdom",
+    flag: "🇬🇧",
+    status: "available",
+    addressFormat: "GENERIC",
+    timeZone: "Europe/London",
+    regionLabel: "County",
+    postalLabel: "Postcode",
+    postalRequired: true,
+    methods: [
+      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 3, maxDays: 5 },
+    ],
+  },
+  {
+    code: "EU",
+    name: "Europe",
+    flag: "🇪🇺",
+    status: "available",
+    addressFormat: "GENERIC",
+    timeZone: "Europe/Paris",
+    regionLabel: "Region / Country",
+    postalLabel: "Postal Code",
+    postalRequired: true,
+    methods: [
+      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 3, maxDays: 5 },
+    ],
+  },
+  {
+    code: "AU",
+    name: "Australia",
+    flag: "🇦🇺",
+    status: "available",
+    addressFormat: "GENERIC",
+    timeZone: "Australia/Sydney",
+    regionLabel: "State / Territory",
+    postalLabel: "Postcode",
+    postalRequired: true,
+    methods: [
+      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 4, maxDays: 6 },
+    ],
+  },
 ];
 
-export const DEFAULT_DESTINATION = "US";
+export const DEFAULT_DESTINATION = "NG";
 
 export function getDestination(code: string | undefined): Destination | undefined {
+  if (!code) return DESTINATIONS.find((d) => d.code === DEFAULT_DESTINATION);
   return DESTINATIONS.find((d) => d.code === code);
 }
 
@@ -115,13 +192,6 @@ export interface MethodAvailability {
   reason?: string;
 }
 
-/**
- * Which delivery methods apply to a destination/region for a given cart.
- * Methods that exist but can't be used are returned with a reason so the UI
- * can explain why (e.g. same-day after the cutoff). Same-day is supported by
- * the engine but not currently offered: add a "same-day" method with `regions`
- * and `cutoffHour` to a destination to enable it.
- */
 export function getMethodAvailability(
   destinationCode: string,
   region: string | undefined,

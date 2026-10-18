@@ -37,7 +37,7 @@ async function main() {
           slug: "classic-red-rose-bouquet",
           name: "Classic Red Rose Bouquet",
           image: "https://images.unsplash.com/photo-1561729098-cbab0f7a9f7c",
-          unitPrice: 50,000,
+          unitPrice: 50000,
           quantity: 1,
           options: { Size: "12 stems" },
         },
