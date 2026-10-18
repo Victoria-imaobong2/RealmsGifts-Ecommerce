@@ -27,7 +27,7 @@ export function DeliveryBanner() {
           <Truck size={14} />
         </div>
         <span>
-          Order before 12 PM for <strong className="font-semibold text-amber-200">Same-Day Delivery</strong> in select areas!
+          Order before 12 PM for <strong className="font-semibold text-amber-200">Same-Day Delivery</strong> in selected areas!
         </span>
         <Link
           href="/delivery"

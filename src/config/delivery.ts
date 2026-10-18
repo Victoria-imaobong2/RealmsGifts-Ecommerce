@@ -15,12 +15,9 @@ export interface DeliveryMethod {
   label: string;
   description: string;
   price: number;
-  /** Business days from order to earliest / latest arrival. */
   minDays: number;
   maxDays: number;
-  /** Same-day only: local cutoff hour (24h) in the destination time zone. */
   cutoffHour?: number;
-  /** Same-day only: region codes where it is offered. */
   regions?: string[];
 }
 
@@ -40,19 +37,6 @@ export interface Destination {
   methods: DeliveryMethod[];
 }
 
-const NG_STATES: [string, string][] = [
-  ["AB", "Abia"], ["AD", "Adamawa"], ["AK", "Akwa Ibom"], ["AN", "Anambra"],
-  ["BA", "Bauchi"], ["BY", "Bayelsa"], ["BE", "Benue"], ["BO", "Borno"],
-  ["CR", "Cross River"], ["DE", "Delta"], ["EB", "Ebonyi"], ["ED", "Edo"],
-  ["EK", "Ekiti"], ["EN", "Enugu"], ["FC", "Federal Capital Territory (Abuja)"],
-  ["GO", "Gombe"], ["IM", "Imo"], ["JI", "Jigawa"], ["KD", "Kaduna"],
-  ["KN", "Kano"], ["KT", "Katsina"], ["KE", "Kebbi"], ["KO", "Kogi"],
-  ["KW", "Kwara"], ["LA", "Lagos"], ["NA", "Nasarawa"], ["NI", "Niger"],
-  ["OG", "Ogun"], ["ON", "Ondo"], ["OS", "Osun"], ["OY", "Oyo"],
-  ["PL", "Plateau"], ["RI", "Rivers"], ["SO", "Sokoto"], ["TA", "Taraba"],
-  ["YO", "Yobe"], ["ZA", "Zamfara"]
-];
-
 const US_STATES: [string, string][] = [
   ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"], ["CA", "California"],
   ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"], ["DC", "District of Columbia"],
@@ -67,9 +51,37 @@ const US_STATES: [string, string][] = [
   ["WA", "Washington"], ["WV", "West Virginia"], ["WI", "Wisconsin"], ["WY", "Wyoming"],
 ];
 
+const NG_STATES: [string, string][] = [
+  ["AB", "Abia"], ["AD", "Adamawa"], ["AK", "Akwa Ibom"], ["AN", "Anambra"],
+  ["BA", "Bauchi"], ["BY", "Bayelsa"], ["BE", "Benue"], ["BO", "Borno"],
+  ["CR", "Cross River"], ["DE", "Delta"], ["EB", "Ebonyi"], ["ED", "Edo"],
+  ["EK", "Ekiti"], ["EN", "Enugu"], ["FC", "Federal Capital Territory (Abuja)"],
+  ["GO", "Gombe"], ["IM", "Imo"], ["JI", "Jigawa"], ["KD", "Kaduna"],
+  ["KN", "Kano"], ["KT", "Katsina"], ["KE", "Kebbi"], ["KO", "Kogi"],
+  ["KW", "Kwara"], ["LA", "Lagos"], ["NA", "Nasarawa"], ["NI", "Niger"],
+  ["OG", "Ogun"], ["ON", "Ondo"], ["OS", "Osun"], ["OY", "Oyo"],
+  ["PL", "Plateau"], ["RI", "Rivers"], ["SO", "Sokoto"], ["TA", "Taraba"],
+  ["YO", "Yobe"], ["ZA", "Zamfara"]
+];
+
 const toRegions = (list: [string, string][]) => list.map(([code, name]) => ({ code, name }));
 
 export const DESTINATIONS: Destination[] = [
+  {
+    code: "US",
+    name: "United States",
+    flag: "🇺🇸",
+    status: "available",
+    addressFormat: "US",
+    timeZone: "America/New_York",
+    regionLabel: "State",
+    postalLabel: "ZIP Code",
+    postalRequired: true,
+    regions: toRegions(US_STATES),
+    methods: [
+      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 3, maxDays: 5 },
+    ],
+  },
   {
     code: "NG",
     name: "Nigeria",
@@ -85,21 +97,6 @@ export const DESTINATIONS: Destination[] = [
       { id: "standard", label: "Standard Delivery", description: "Doorstep delivery nationwide.", price: 0, minDays: 2, maxDays: 4 },
       { id: "same-day", label: "Same-Day Delivery", description: "Order before 12 PM for today's delivery.", price: 5000, minDays: 0, maxDays: 0, cutoffHour: 12 },
       { id: "scheduled", label: "Scheduled Delivery", description: "Choose the exact day it arrives.", price: 3000, minDays: 1, maxDays: 1 },
-    ],
-  },
-  {
-    code: "US",
-    name: "United States",
-    flag: "🇺🇸",
-    status: "available",
-    addressFormat: "US",
-    timeZone: "America/New_York",
-    regionLabel: "State",
-    postalLabel: "ZIP Code",
-    postalRequired: true,
-    regions: toRegions(US_STATES),
-    methods: [
-      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 3, maxDays: 5 },
     ],
   },
   {
@@ -160,7 +157,7 @@ export const DESTINATIONS: Destination[] = [
   },
 ];
 
-export const DEFAULT_DESTINATION = "NG";
+export const DEFAULT_DESTINATION = "US";
 
 export function getDestination(code: string | undefined): Destination | undefined {
   if (!code) return DESTINATIONS.find((d) => d.code === DEFAULT_DESTINATION);
@@ -173,7 +170,6 @@ export function destinationSupportsSameDay(code: string): boolean {
   return Boolean(getDestination(code)?.methods.some((m) => m.id === "same-day"));
 }
 
-/** Current hour and weekday in a given time zone. */
 function zonedNow(timeZone: string, now: Date) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -219,7 +215,6 @@ export function getMethodAvailability(
   });
 }
 
-/** Adds business days (Mon–Fri) to a date. */
 export function addBusinessDays(from: Date, days: number): Date {
   const date = new Date(from);
   let added = 0;
@@ -238,7 +233,6 @@ export function estimateArrival(method: DeliveryMethod, now = new Date()) {
   };
 }
 
-/** Earliest date (YYYY-MM-DD) a scheduled delivery can be booked for. */
 export function earliestScheduledDate(method: DeliveryMethod, now = new Date()): string {
   return addBusinessDays(now, method.minDays).toISOString().slice(0, 10);
 }
