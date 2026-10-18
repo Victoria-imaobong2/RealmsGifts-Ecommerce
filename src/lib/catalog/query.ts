@@ -81,13 +81,15 @@ function matchesFilters(product: Product, filters: CatalogFilters): boolean {
   if (filters.availability === "in-stock" && !isAvailable(product)) return false;
   if (filters.maxPrice !== undefined && product.price > filters.maxPrice) return false;
   if (filters.minPrice !== undefined && product.price < filters.minPrice) return false;
+  
   if (filters.budget) {
     const budget = getBudget(filters.budget);
     if (budget) {
-      if (product.price < budget.min) return false;
-      if (budget.max !== null && product.price >= budget.max) return false;
+      if (budget.min !== undefined && product.price < budget.min) return false;
+      if (budget.max !== undefined && budget.max !== null && product.price >= budget.max) return false;
     }
   }
+
   if (filters.shipTo && !deliversTo(filters.shipTo)) return false;
   if (filters.speed === "same-day") {
     if (!product.sameDayEligible) return false;
@@ -97,15 +99,19 @@ function matchesFilters(product: Product, filters: CatalogFilters): boolean {
 }
 
 const normalize = (value: string) =>
-  value.toLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}$ ]/gu, " ").replace(/\s+/g, " ").trim();
+  value.toLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}₦$ ]/gu, " ").replace(/\s+/g, " ").trim();
 
-/** Extracts budget phrases like "under $50" so the rest can be text-matched. */
+/** Extracts budget phrases like "under 50k" or "under ₦50000" so the rest can be text-matched. */
 export function parseSearchQuery(query: string): { text: string; maxPrice?: number } {
-  const match = query.match(/under\s*\$?\s*(\d+)/i);
+  const match = query.match(/under\s*[₦$]?\s*(\d+)(k)?/i);
   if (!match) return { text: query };
+  
+  let val = Number(match[1]);
+  if (match[2]?.toLowerCase() === "k") val *= 1000;
+
   return {
     text: query.replace(match[0], " ").trim(),
-    maxPrice: Number(match[1]),
+    maxPrice: val,
   };
 }
 
@@ -165,7 +171,6 @@ export function sortProducts(products: Product[], sort: SortKey): Product[] {
     case "price-desc":
       return sorted.sort((a, b) => b.price - a.price);
     default:
-      // Editor's picks first, then newest.
       return sorted.sort(
         (a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || b.addedAt.localeCompare(a.addedAt),
       );
@@ -181,6 +186,6 @@ export function searchTaxonomy(query: string) {
     categories: CATEGORIES.filter((c) => hit(c.name) || hit(c.slug.replace("-", " "))).slice(0, 4),
     occasions: OCCASIONS.filter((o) => hit(o.name)).slice(0, 4),
     recipients: RECIPIENTS.filter((r) => hit(r.name) || hit(r.label)).slice(0, 4),
-    budgets: BUDGETS.filter((b) => hit(b.label) || (q.startsWith("under") && b.max !== null && q.includes(String(b.max)))).slice(0, 2),
+    budgets: BUDGETS.filter((b) => hit(b.label) || (q.startsWith("under") && b.max !== undefined && b.max !== null && q.includes(String(b.max)))).slice(0, 2),
   };
 }

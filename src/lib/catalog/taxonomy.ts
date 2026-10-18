@@ -141,19 +141,18 @@ export const RECIPIENTS: Recipient[] = [
 
 export type BudgetSlug = "under-25" | "25-50" | "50-100" | "100-200" | "200-plus";
 
-export interface Budget {
-  slug: BudgetSlug;
+export interface BudgetOption {
+  slug: string;
   label: string;
-  min: number;
-  max: number | null;
+  min?: number;
+  max?: number;
 }
 
-export const BUDGETS: Budget[] = [
-  { slug: "under-25", label: "Under $25", min: 0, max: 25 },
-  { slug: "25-50", label: "$25–$50", min: 25, max: 50 },
-  { slug: "50-100", label: "$50–$100", min: 50, max: 100 },
-  { slug: "100-200", label: "$100–$200", min: 100, max: 200 },
-  { slug: "200-plus", label: "$200+", min: 200, max: null },
+export const BUDGETS: BudgetOption[] = [
+  { slug: "under-50k", label: "Under ₦50,000", max: 50000 },
+  { slug: "50k-70k", label: "₦50,000 – ₦70,000", min: 50000, max: 70000 },
+  { slug: "70k-100k", label: "₦70,000 – ₦100,000", min: 70000, max: 100000 },
+  { slug: "over-100k", label: "Over ₦100,000", min: 100000 },
 ];
 
 export const getCategory = (slug: string) => CATEGORIES.find((c) => c.slug === slug);
