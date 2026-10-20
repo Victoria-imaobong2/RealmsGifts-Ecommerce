@@ -1,11 +1,11 @@
 /**
- * DELIVERY CONFIGURATION — single source of truth for where Realmsgifts
- * delivers, how, and at what price.
+ * DELIVERY CONFIGURATION — RealmsGifts
+ * Single source of truth for delivery options, regions, and rules.
  */
 
 export const DELIVERY_RATES_CONFIRMED = true;
 
-/** Flat gift-wrap fee per order, in NGN. */
+/** Flat gift-wrap fee per order in NGN. */
 export const GIFT_WRAP_FEE = 5000;
 
 export type DeliveryMethodId = "standard" | "express" | "same-day" | "scheduled";
@@ -36,6 +36,13 @@ export interface Destination {
   regions?: { code: string; name: string }[];
   methods: DeliveryMethod[];
 }
+
+const COMMON_METHODS: DeliveryMethod[] = [
+  { id: "standard", label: "Standard Delivery", description: "Standard tracked doorstep delivery.", price: 0, minDays: 3, maxDays: 5 },
+  { id: "express", label: "Express Shipping", description: "Fast-track priority shipping via DHL / FedEx.", price: 15000, minDays: 1, maxDays: 3 },
+  { id: "same-day", label: "Same-Day Delivery", description: "Order before 12 PM for local delivery today.", price: 5000, minDays: 0, maxDays: 0, cutoffHour: 12 },
+  { id: "scheduled", label: "Scheduled Delivery", description: "Choose a specific delivery date.", price: 3000, minDays: 1, maxDays: 1 },
+];
 
 const US_STATES: [string, string][] = [
   ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"], ["CA", "California"],
@@ -78,9 +85,7 @@ export const DESTINATIONS: Destination[] = [
     postalLabel: "ZIP Code",
     postalRequired: true,
     regions: toRegions(US_STATES),
-    methods: [
-      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 3, maxDays: 5 },
-    ],
+    methods: COMMON_METHODS,
   },
   {
     code: "NG",
@@ -93,11 +98,7 @@ export const DESTINATIONS: Destination[] = [
     postalLabel: "Postal Code",
     postalRequired: false,
     regions: toRegions(NG_STATES),
-    methods: [
-      { id: "standard", label: "Standard Delivery", description: "Doorstep delivery nationwide.", price: 0, minDays: 2, maxDays: 4 },
-      { id: "same-day", label: "Same-Day Delivery", description: "Order before 12 PM for today's delivery.", price: 5000, minDays: 0, maxDays: 0, cutoffHour: 12 },
-      { id: "scheduled", label: "Scheduled Delivery", description: "Choose the exact day it arrives.", price: 3000, minDays: 1, maxDays: 1 },
-    ],
+    methods: COMMON_METHODS,
   },
   {
     code: "CA",
@@ -109,9 +110,7 @@ export const DESTINATIONS: Destination[] = [
     regionLabel: "Province",
     postalLabel: "Postal code",
     postalRequired: true,
-    methods: [
-      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 3, maxDays: 5 },
-    ],
+    methods: COMMON_METHODS,
   },
   {
     code: "GB",
@@ -123,9 +122,7 @@ export const DESTINATIONS: Destination[] = [
     regionLabel: "County",
     postalLabel: "Postcode",
     postalRequired: true,
-    methods: [
-      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 3, maxDays: 5 },
-    ],
+    methods: COMMON_METHODS,
   },
   {
     code: "EU",
@@ -137,9 +134,7 @@ export const DESTINATIONS: Destination[] = [
     regionLabel: "Region / Country",
     postalLabel: "Postal Code",
     postalRequired: true,
-    methods: [
-      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 3, maxDays: 5 },
-    ],
+    methods: COMMON_METHODS,
   },
   {
     code: "AU",
@@ -151,9 +146,7 @@ export const DESTINATIONS: Destination[] = [
     regionLabel: "State / Territory",
     postalLabel: "Postcode",
     postalRequired: true,
-    methods: [
-      { id: "express", label: "International Express", description: "Tracked express shipping via DHL/FedEx.", price: 0, minDays: 4, maxDays: 6 },
-    ],
+    methods: COMMON_METHODS,
   },
 ];
 
@@ -198,18 +191,9 @@ export function getMethodAvailability(
   if (!destination || destination.status !== "available") return [];
   return destination.methods.map((method) => {
     if (method.id !== "same-day") return { method, available: true };
-    if (!items.every((item) => item.sameDayEligible)) {
-      return { method, available: false, reason: "Same-day delivery isn't available for every item in your order." };
-    }
-    if (method.regions && (!region || !method.regions.includes(region))) {
-      const names = method.regions
-        .map((code) => destination.regions?.find((r) => r.code === code)?.name ?? code)
-        .join(", ");
-      return { method, available: false, reason: `Same-day delivery is currently available in ${names} only.` };
-    }
     const { hour, weekend } = zonedNow(destination.timeZone, now);
     if (weekend || (method.cutoffHour !== undefined && hour >= method.cutoffHour)) {
-      return { method, available: false, reason: "Today's same-day cutoff has passed. Choose express or scheduled delivery." };
+      return { method, available: false, reason: "Today's same-day cutoff has passed." };
     }
     return { method, available: true };
   });
