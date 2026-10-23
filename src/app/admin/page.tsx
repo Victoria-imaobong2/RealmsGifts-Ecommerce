@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, type SubmitEvent } from "react";
+import { useState, useEffect, useMemo, type FormEvent } from "react";
 import { PlusCircle, Search } from "lucide-react";
 import { CATEGORIES } from "@/lib/catalog/taxonomy";
 import { formatMoney } from "@/lib/format";
@@ -38,6 +38,10 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
+
+  // Inline Stock Editing State
+  const [editingStockId, setEditingStockId] = useState<string | null>(null);
+  const [tempStockValue, setTempStockValue] = useState<number>(0);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -92,7 +96,7 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  const handleCreateProduct = async (e: SubmitEvent<HTMLFormElement>) => {
+  const handleCreateProduct = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const res = await fetch("/api/admin/products", {
@@ -119,6 +123,25 @@ export default function AdminDashboard() {
       }
     } catch {
       alert("Error saving product.");
+    }
+  };
+
+  const handleUpdateStock = async (productId: string, newStock: number) => {
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: productId, stock: newStock }),
+      });
+
+      if (res.ok) {
+        setProducts((prev) => prev.map((p) => (p.id === productId ? { ...p, stock: newStock } : p)));
+        setEditingStockId(null);
+      } else {
+        alert("Failed to update stock quantity.");
+      }
+    } catch {
+      alert("Error updating stock quantity.");
     }
   };
 
@@ -160,19 +183,19 @@ export default function AdminDashboard() {
   }, [orders, searchQuery, statusFilter, sortBy]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Admin Control Center</h1>
           <p className="text-xs text-slate-500">Manage store catalogue, track shipments, and oversee orders</p>
         </div>
 
-        <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+        <div className="flex rounded-xl bg-slate-100 p-1 text-xs font-semibold">
           <button
             type="button"
             onClick={() => setActiveTab("products")}
-            className={`px-4 py-2 rounded-lg transition ${
-              activeTab === "products" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"
+            className={`rounded-lg px-4 py-2 transition ${
+              activeTab === "products" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
             }`}
           >
             Products ({products.length})
@@ -180,8 +203,8 @@ export default function AdminDashboard() {
           <button
             type="button"
             onClick={() => setActiveTab("orders")}
-            className={`px-4 py-2 rounded-lg transition ${
-              activeTab === "orders" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"
+            className={`rounded-lg px-4 py-2 transition ${
+              activeTab === "orders" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
             }`}
           >
             Orders ({orders.length})
@@ -189,7 +212,7 @@ export default function AdminDashboard() {
           <button
             type="button"
             onClick={() => setActiveTab("add-product")}
-            className={`px-4 py-2 rounded-lg transition flex items-center gap-1.5 ${
+            className={`flex items-center gap-1.5 rounded-lg px-4 py-2 transition ${
               activeTab === "add-product" ? "bg-forest text-white shadow-sm" : "text-slate-500 hover:text-slate-900"
             }`}
           >
@@ -199,26 +222,66 @@ export default function AdminDashboard() {
       </div>
 
       {activeTab === "products" && (
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-          <table className="w-full text-left border-collapse text-xs">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full border-collapse text-left text-xs">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-medium">
+              <tr className="border-b border-slate-200 bg-slate-50 font-medium uppercase text-slate-500">
                 <th className="p-4">Title</th>
-                <th className="p-4">Price</th>
-                <th className="p-4">Stock</th>
+                <th className="p-4">Price (NGN)</th>
+                <th className="p-4 text-right">Stock Quantity</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {products.map((prod) => (
-                <tr key={prod.id} className="hover:bg-slate-50 transition">
+                <tr key={prod.id} className="transition hover:bg-slate-50">
                   <td className="p-4 font-semibold text-slate-800">{prod.title}</td>
                   <td className="p-4 font-medium text-slate-900">{formatMoney(prod.price)}</td>
-                  <td className="p-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                      prod.stock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-                    }`}>
-                      {prod.stock > 0 ? `${prod.stock} in stock` : "Out of stock"}
-                    </span>
+                  <td className="p-4 text-right">
+                    {editingStockId === prod.id ? (
+                      <div className="inline-flex items-center justify-end gap-2">
+                        <input
+                          type="number"
+                          value={tempStockValue}
+                          onChange={(e) => setTempStockValue(parseInt(e.target.value, 10) || 0)}
+                          className="w-20 rounded border border-slate-300 px-2 py-1 text-center text-xs outline-none focus:border-forest"
+                          min="0"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateStock(prod.id, tempStockValue)}
+                          className="rounded bg-forest px-2.5 py-1 text-[11px] font-bold text-white hover:bg-forest-dark"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingStockId(null)}
+                          className="rounded bg-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-300"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center justify-end gap-3">
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                            prod.stock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+                          }`}
+                        >
+                          {prod.stock > 0 ? `${prod.stock} units` : "Out of stock"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingStockId(prod.id);
+                            setTempStockValue(prod.stock);
+                          }}
+                          className="text-[11px] font-semibold text-forest hover:underline"
+                        >
+                          Edit Stock
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -236,7 +299,7 @@ export default function AdminDashboard() {
 
       {activeTab === "orders" && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex flex-col items-center gap-3 sm:flex-row">
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-2.5 text-slate-400" size={14} />
               <input
@@ -244,20 +307,22 @@ export default function AdminDashboard() {
                 placeholder="Search order number or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:border-forest"
+                className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-xs outline-none focus:border-forest"
               />
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex w-full items-center gap-2 sm:w-auto">
               <select
                 aria-label="Filter orders by status"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none"
+                className="rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none"
               >
                 <option value="ALL">All Statuses</option>
                 {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
                 ))}
               </select>
 
@@ -265,7 +330,7 @@ export default function AdminDashboard() {
                 aria-label="Sort orders"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none"
+                className="rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none"
               >
                 <option value="date-desc">Newest First</option>
                 <option value="date-asc">Oldest First</option>
@@ -275,10 +340,10 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-medium">
+                <tr className="border-b border-slate-200 bg-slate-50 font-medium uppercase text-slate-500">
                   <th className="p-4">Order ID</th>
                   <th className="p-4">Customer</th>
                   <th className="p-4">Total</th>
@@ -297,12 +362,14 @@ export default function AdminDashboard() {
                       : "bg-amber-50 text-amber-700";
 
                   return (
-                    <tr key={order.id} className="hover:bg-slate-50 transition">
-                      <td className="p-4 font-mono font-medium text-slate-700">{order.orderNumber ?? order.id.slice(-8)}</td>
+                    <tr key={order.id} className="transition hover:bg-slate-50">
+                      <td className="p-4 font-mono font-medium text-slate-700">
+                        {order.orderNumber ?? order.id.slice(-8)}
+                      </td>
                       <td className="p-4 text-slate-600">{order.email || "—"}</td>
                       <td className="p-4 font-semibold text-slate-900">{formatMoney(order.total)}</td>
                       <td className="p-4">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${statusBadgeColor}`}>
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${statusBadgeColor}`}>
                           {STATUS_LABELS[order.status as keyof typeof STATUS_LABELS] ?? order.status}
                         </span>
                       </td>
@@ -314,12 +381,22 @@ export default function AdminDashboard() {
                           aria-label={`Update status for order ${order.id}`}
                           value={order.status}
                           onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
-                          className="text-[11px] border border-slate-200 rounded px-2 py-1 outline-none"
+                          className="rounded border border-slate-200 px-2 py-1 text-[11px] outline-none"
                         >
-                          {order.status === "PAID" && <option value="PAID" disabled>Paid (set by Paystack)</option>}
-                          {order.status === "PAYMENT_FAILED" && <option value="PAYMENT_FAILED" disabled>Payment failed</option>}
+                          {order.status === "PAID" && (
+                            <option value="PAID" disabled>
+                              Paid (set by Paystack)
+                            </option>
+                          )}
+                          {order.status === "PAYMENT_FAILED" && (
+                            <option value="PAYMENT_FAILED" disabled>
+                              Payment failed
+                            </option>
+                          )}
                           {STAFF_STATUSES.map((status) => (
-                            <option key={status} value={status}>{STATUS_LABELS[status]}</option>
+                            <option key={status} value={status}>
+                              {STATUS_LABELS[status]}
+                            </option>
                           ))}
                         </select>
                       </td>
@@ -340,11 +417,11 @@ export default function AdminDashboard() {
       )}
 
       {activeTab === "add-product" && (
-        <div className="max-w-xl bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <h2 className="text-base font-bold text-slate-900 mb-4">Add Item to Catalog</h2>
+        <div className="max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-base font-bold text-slate-900">Add Item to Catalog</h2>
           <form onSubmit={handleCreateProduct} className="space-y-4 text-xs">
             <div>
-              <label htmlFor="product-title" className="block font-semibold text-slate-700 mb-1">
+              <label htmlFor="product-title" className="mb-1 block font-semibold text-slate-700">
                 Product Title
               </label>
               <input
@@ -353,15 +430,15 @@ export default function AdminDashboard() {
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="e.g. Rose Gold Pendant Necklace"
-                className="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-forest"
+                placeholder="e.g. Red Velvet Deluxe Celebration Cake"
+                className="w-full rounded-lg border border-slate-200 p-2.5 outline-none focus:border-forest"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="product-price" className="block font-semibold text-slate-700 mb-1">
-                  Price (USD)
+                <label htmlFor="product-price" className="mb-1 block font-semibold text-slate-700">
+                  Price (NGN ₦)
                 </label>
                 <input
                   id="product-price"
@@ -369,16 +446,16 @@ export default function AdminDashboard() {
                   type="number"
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  placeholder="49.99"
+                  placeholder="45000"
                   step="0.01"
                   min="0.01"
-                  className="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-forest"
+                  className="w-full rounded-lg border border-slate-200 p-2.5 outline-none focus:border-forest"
                 />
               </div>
 
               <div>
-                <label htmlFor="product-stock" className="block font-semibold text-slate-700 mb-1">
-                  Initial Stock
+                <label htmlFor="product-stock" className="mb-1 block font-semibold text-slate-700">
+                  Initial Stock Quantity
                 </label>
                 <input
                   id="product-stock"
@@ -386,30 +463,32 @@ export default function AdminDashboard() {
                   type="number"
                   value={formData.stock}
                   onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  placeholder="50"
-                  className="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-forest"
+                  placeholder="25"
+                  className="w-full rounded-lg border border-slate-200 p-2.5 outline-none focus:border-forest"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="product-category" className="block font-semibold text-slate-700 mb-1">
+              <label htmlFor="product-category" className="mb-1 block font-semibold text-slate-700">
                 Category
               </label>
               <select
                 id="product-category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-forest bg-white"
+                className="w-full rounded-lg border border-slate-200 bg-white p-2.5 outline-none focus:border-forest"
               >
                 {CATEGORIES.map((c) => (
-                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                  <option key={c.slug} value={c.slug}>
+                    {c.name}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label htmlFor="product-image" className="block font-semibold text-slate-700 mb-1">
+              <label htmlFor="product-image" className="mb-1 block font-semibold text-slate-700">
                 Image URL (Optional)
               </label>
               <input
@@ -418,12 +497,12 @@ export default function AdminDashboard() {
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 placeholder="https://… (must be a photo of this exact product)"
-                className="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-forest"
+                className="w-full rounded-lg border border-slate-200 p-2.5 outline-none focus:border-forest"
               />
             </div>
 
             <div>
-              <label htmlFor="product-desc" className="block font-semibold text-slate-700 mb-1">
+              <label htmlFor="product-desc" className="mb-1 block font-semibold text-slate-700">
                 Description
               </label>
               <textarea
@@ -432,13 +511,13 @@ export default function AdminDashboard() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Details on pack size, origin, shelf life..."
-                className="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-forest"
+                className="w-full rounded-lg border border-slate-200 p-2.5 outline-none focus:border-forest"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-forest hover:bg-forest-dark text-white font-semibold rounded-lg transition"
+              className="w-full rounded-lg bg-forest py-2.5 font-semibold text-white transition hover:bg-forest-dark"
             >
               Publish Item
             </button>
