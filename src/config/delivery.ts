@@ -40,7 +40,7 @@ export interface Destination {
 const COMMON_METHODS: DeliveryMethod[] = [
   { id: "standard", label: "Standard Delivery", description: "Standard tracked doorstep delivery.", price: 0, minDays: 3, maxDays: 5 },
   { id: "express", label: "Express Shipping", description: "Fast-track priority shipping via DHL / FedEx.", price: 5000, minDays: 1, maxDays: 3 },
-  { id: "same-day", label: "Same-Day Delivery", description: "Order before 12 PM for local delivery today.", price: 15000, minDays: 0, maxDays: 0, cutoffHour: 14 },
+  { id: "same-day", label: "Same-Day Delivery", description: "Order before 2 PM for local delivery today.", price: 15000, minDays: 0, maxDays: 0, cutoffHour: 14 },
   { id: "scheduled", label: "Scheduled Delivery", description: "Choose a specific delivery date.", price: 3000, minDays: 1, maxDays: 1 },
 ];
 
@@ -150,7 +150,7 @@ export const DESTINATIONS: Destination[] = [
   },
 ];
 
-export const DEFAULT_DESTINATION = "US";
+export const DEFAULT_DESTINATION = "NG";
 
 export function getDestination(code: string | undefined): Destination | undefined {
   if (!code) return DESTINATIONS.find((d) => d.code === DEFAULT_DESTINATION);
