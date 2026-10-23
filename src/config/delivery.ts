@@ -83,7 +83,7 @@ export const DESTINATIONS: Destination[] = countries
     flag: c.flag,
     status: "available" as const,
     addressFormat: (c.cca2 === "US" ? "US" : "GENERIC") as AddressFormat,
-    timeZone: c.timezones[0] || "UTC",
+    timeZone: (c as { timezones?: string[] }).timezones?.[0] || "UTC",
     regionLabel: c.cca2 === "US" ? "State" : "State / Region / Province",
     postalLabel: c.cca2 === "US" ? "ZIP Code" : "Postal / Post Code",
     postalRequired: c.cca2 !== "NG",
