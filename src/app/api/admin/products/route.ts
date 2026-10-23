@@ -70,8 +70,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, product });
   } catch (error: unknown) {
     console.error("[admin] Product create DB error:", error);
-    return NextResponse.json({ error: "Database error creating product." }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Database error creating product";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
+  
 }
 
 export async function PUT(req: Request) {
