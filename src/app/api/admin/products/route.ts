@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = await req.json();
-    const title = body.title || body.name;
+    const title = body.title;
     const description = body.description || "";
     const price = Number.parseFloat(body.price);
     const stock = Number.parseInt(body.stock, 10);
@@ -56,7 +56,6 @@ export async function POST(req: Request) {
         slug,
         title,
         description: description || title,
-        shortDescription: description ? description.slice(0, 100) : title,
         price,
         stock,
         category: categorySlug,
@@ -72,42 +71,42 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, product });
   } catch (error: unknown) {
     console.error("[admin] Product create DB error:", error);
-    return NextResponse.json({ error: "Database error creating product. Please check fields." }, { status: 500 });
+    return NextResponse.json({ error: "Database error creating product." }, { status: 500 });
   }
 }
 
 export async function PUT(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
- try {
-  const body = await req.json();
-  const { id, title, description, price, stock, imageUrl, category } = body;
+  try {
+    const body = await req.json();
+    const { id, title, description, price, stock, imageUrl, category } = body;
 
-  if (!id) return NextResponse.json({ error: "Product ID required" }, { status: 400 });
+    if (!id) return NextResponse.json({ error: "Product ID required" }, { status: 400 });
 
-  const parsedPrice = price !== undefined ? Number.parseFloat(price) : undefined;
-  const parsedStock = stock !== undefined ? Number.parseInt(stock, 10) : undefined;
+    const parsedPrice = price !== undefined ? Number.parseFloat(price) : undefined;
+    const parsedStock = stock !== undefined ? Number.parseInt(stock, 10) : undefined;
 
-  const updated = await prisma.product.update({
-    where: { id },
-    data: {
-      ...(title && { title }),
-      ...(description !== undefined && { description }),
-      ...(parsedPrice !== undefined && !Number.isNaN(parsedPrice) && { price: parsedPrice }),
-      ...(parsedStock !== undefined && !Number.isNaN(parsedStock) && { stock: parsedStock }),
-      ...(category && { category: getCategory(category)?.slug ?? category }),
-      ...(imageUrl ? { images: [imageUrl] } : {}),
-    },
-  });
+    const updated = await prisma.product.update({
+      where: { id },
+      data: {
+        ...(title && { title }),
+        ...(description !== undefined && { description }),
+        ...(parsedPrice !== undefined && !Number.isNaN(parsedPrice) && { price: parsedPrice }),
+        ...(parsedStock !== undefined && !Number.isNaN(parsedStock) && { stock: parsedStock }),
+        ...(category && { category: getCategory(category)?.slug ?? category }),
+        ...(imageUrl ? { images: [imageUrl] } : {}),
+      },
+    });
 
-  revalidatePath("/admin");
-  revalidatePath("/shop");
-  revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath("/shop");
+    revalidatePath("/");
 
-  return NextResponse.json({ success: true, product: updated });
-} catch (error) {
-  console.error("[admin] Product update error:", error);
-  return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
-}
+    return NextResponse.json({ success: true, product: updated });
+  } catch (error) {
+    console.error("[admin] Product update error:", error);
+    return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
+  }
 }
 
 export async function PATCH(req: Request) {
