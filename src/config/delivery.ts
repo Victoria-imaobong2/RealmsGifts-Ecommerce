@@ -3,6 +3,8 @@
  * Single source of truth for delivery options, regions, and rules.
  */
 
+import countries from "world-countries";
+
 export const DELIVERY_RATES_CONFIRMED = true;
 
 /** Flat gift-wrap fee per order in NGN. */
@@ -73,82 +75,22 @@ const NG_STATES: [string, string][] = [
 
 const toRegions = (list: [string, string][]) => list.map(([code, name]) => ({ code, name }));
 
-export const DESTINATIONS: Destination[] = [
-  {
-    code: "US",
-    name: "United States",
-    flag: "🇺🇸",
-    status: "available",
-    addressFormat: "US",
-    timeZone: "America/New_York",
-    regionLabel: "State",
-    postalLabel: "ZIP Code",
-    postalRequired: true,
-    regions: toRegions(US_STATES),
+// Dynamically generate all ~250 global destinations alphabetically
+export const DESTINATIONS: Destination[] = countries
+  .map((c) => ({
+    code: c.cca2,
+    name: c.name.common,
+    flag: c.flag,
+    status: "available" as const,
+    addressFormat: (c.cca2 === "US" ? "US" : "GENERIC") as AddressFormat,
+    timeZone: c.timezones[0] || "UTC",
+    regionLabel: c.cca2 === "US" ? "State" : "State / Region / Province",
+    postalLabel: c.cca2 === "US" ? "ZIP Code" : "Postal / Post Code",
+    postalRequired: c.cca2 !== "NG",
+    regions: c.cca2 === "US" ? toRegions(US_STATES) : c.cca2 === "NG" ? toRegions(NG_STATES) : undefined,
     methods: COMMON_METHODS,
-  },
-  {
-    code: "NG",
-    name: "Nigeria",
-    flag: "🇳🇬",
-    status: "available",
-    addressFormat: "GENERIC",
-    timeZone: "Africa/Lagos",
-    regionLabel: "State",
-    postalLabel: "Postal Code",
-    postalRequired: false,
-    regions: toRegions(NG_STATES),
-    methods: COMMON_METHODS,
-  },
-  {
-    code: "CA",
-    name: "Canada",
-    flag: "🇨🇦",
-    status: "available",
-    addressFormat: "GENERIC",
-    timeZone: "America/Toronto",
-    regionLabel: "Province",
-    postalLabel: "Postal code",
-    postalRequired: true,
-    methods: COMMON_METHODS,
-  },
-  {
-    code: "GB",
-    name: "United Kingdom",
-    flag: "🇬🇧",
-    status: "available",
-    addressFormat: "GENERIC",
-    timeZone: "Europe/London",
-    regionLabel: "County",
-    postalLabel: "Postcode",
-    postalRequired: true,
-    methods: COMMON_METHODS,
-  },
-  {
-    code: "EU",
-    name: "Europe",
-    flag: "🇪🇺",
-    status: "available",
-    addressFormat: "GENERIC",
-    timeZone: "Europe/Paris",
-    regionLabel: "Region / Country",
-    postalLabel: "Postal Code",
-    postalRequired: true,
-    methods: COMMON_METHODS,
-  },
-  {
-    code: "AU",
-    name: "Australia",
-    flag: "🇦🇺",
-    status: "available",
-    addressFormat: "GENERIC",
-    timeZone: "Australia/Sydney",
-    regionLabel: "State / Territory",
-    postalLabel: "Postcode",
-    postalRequired: true,
-    methods: COMMON_METHODS,
-  },
-];
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 export const DEFAULT_DESTINATION = "NG";
 
@@ -157,7 +99,7 @@ export function getDestination(code: string | undefined): Destination | undefine
   return DESTINATIONS.find((d) => d.code === code);
 }
 
-export const AVAILABLE_DESTINATIONS = DESTINATIONS.filter((d) => d.status === "available");
+export const AVAILABLE_DESTINATIONS = DESTINATIONS;
 
 export function destinationSupportsSameDay(code: string): boolean {
   return Boolean(getDestination(code)?.methods.some((m) => m.id === "same-day"));
