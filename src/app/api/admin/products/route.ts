@@ -60,7 +60,6 @@ export async function POST(req: Request) {
         stock,
         category: categorySlug,
         images: imageUrl ? [imageUrl] : [],
-        featured: true,
       },
     });
 
