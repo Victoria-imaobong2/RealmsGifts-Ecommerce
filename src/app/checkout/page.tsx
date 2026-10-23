@@ -409,7 +409,7 @@ export default function CheckoutPage() {
               <div className="flex justify-between"><dt className="text-muted">Sales tax</dt><dd className="text-muted">Not calculated</dd></div>
               <div className="flex justify-between border-t border-line pt-3 text-base font-semibold"><dt className="text-ink">Total</dt><dd className="text-ink">{formatMoney(totals.total)}</dd></div>
             </dl>
-            <p className="mt-2 text-xs text-muted">All prices in USD. Sales tax isn&apos;t currently calculated or charged on orders.</p>
+            <p className="mt-2 text-xs text-muted">All prices in NGN. Sales tax isn&apos;t currently calculated or charged on orders.</p>
 
             {serverError && (
               <div ref={errorRef} tabIndex={-1} className="mt-4 focus:outline-none">

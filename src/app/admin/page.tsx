@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo, type FormEvent } from "react";
-import { PlusCircle, Search } from "lucide-react";
+import { useState, useEffect, useMemo, type FormEvent, type ChangeEvent } from "react";
+import Image from "next/image";
+import { PlusCircle, Search, UploadCloud, Loader2 } from "lucide-react";
 import { CATEGORIES } from "@/lib/catalog/taxonomy";
 import { formatMoney } from "@/lib/format";
 import { STATUS_LABELS } from "@/lib/order-status";
@@ -42,6 +43,10 @@ export default function AdminDashboard() {
   // Inline Stock Editing State
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
   const [tempStockValue, setTempStockValue] = useState<number>(0);
+
+  // Image Upload State
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -96,6 +101,37 @@ export default function AdminDashboard() {
     };
   }, []);
 
+  const handleImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImagePreview(URL.createObjectURL(file));
+    setUploadingImage(true);
+
+    try {
+      const uploadData = new FormData();
+      uploadData.append("file", file);
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: uploadData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setFormData((prev) => ({ ...prev, imageUrl: data.url }));
+      } else {
+        alert(data.error || "Failed to upload image.");
+        setImagePreview(null);
+      }
+    } catch {
+      alert("Error uploading image file.");
+      setImagePreview(null);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleCreateProduct = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
@@ -115,6 +151,7 @@ export default function AdminDashboard() {
       if (res.ok) {
         alert("Product published successfully!");
         setFormData({ title: "", description: "", price: "", stock: "", imageUrl: "", category: "gift-boxes" });
+        setImagePreview(null);
         setActiveTab("products");
         refreshData();
       } else {
@@ -487,16 +524,45 @@ export default function AdminDashboard() {
               </select>
             </div>
 
+            {/* Direct Device Image Picker Area */}
+            <div>
+              <label className="mb-1 block font-semibold text-slate-700">Product Photo</label>
+              <div className="relative flex min-h-[110px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-4 transition hover:border-forest">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFileChange}
+                  className="absolute inset-0 cursor-pointer opacity-0"
+                />
+
+                {uploadingImage ? (
+                  <div className="flex items-center gap-2 text-xs font-medium text-forest">
+                    <Loader2 size={18} className="animate-spin" /> Uploading image...
+                  </div>
+                ) : imagePreview ? (
+                  <div className="relative h-20 w-20 overflow-hidden rounded-lg border border-slate-200">
+                    <Image src={imagePreview} alt="Upload preview" fill className="object-cover" />
+                  </div>
+                ) : (
+                  <div className="text-center text-xs text-slate-500">
+                    <UploadCloud size={22} className="mx-auto mb-1 text-slate-400" />
+                    <p className="font-semibold text-slate-700">Click to select photo from device</p>
+                    <p className="text-[10px] text-slate-400">PNG, JPG, or WEBP</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div>
               <label htmlFor="product-image" className="mb-1 block font-semibold text-slate-700">
-                Image URL (Optional)
+                Image URL (Auto-filled or manual)
               </label>
               <input
                 id="product-image"
                 type="url"
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                placeholder="https://… (must be a photo of this exact product)"
+                placeholder="https://… (auto-fills when you pick a photo above)"
                 className="w-full rounded-lg border border-slate-200 p-2.5 outline-none focus:border-forest"
               />
             </div>
@@ -517,7 +583,8 @@ export default function AdminDashboard() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-forest py-2.5 font-semibold text-white transition hover:bg-forest-dark"
+              disabled={uploadingImage}
+              className="w-full rounded-lg bg-forest py-2.5 font-semibold text-white transition hover:bg-forest-dark disabled:opacity-50"
             >
               Publish Item
             </button>
