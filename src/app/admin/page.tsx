@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo, type ChangeEvent, type FormEvent as ReactFormEvent } from "react";
+import { useState, useEffect, useMemo, type FormEvent } from "react";
 import Image from "next/image";
-import { PlusCircle, Search, UploadCloud, Loader2, Edit, X } from "lucide-react";
+import { PlusCircle, Search, UploadCloud, Edit, X } from "lucide-react";
 import { formatMoney } from "@/lib/format";
 import { STATUS_LABELS } from "@/lib/order-status";
+import { CldUploadButton } from "next-cloudinary";
 
 interface Product {
   id: string;
@@ -44,10 +45,6 @@ export default function AdminDashboard() {
 
   // Full Product Edit Modal State
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-
-  // Upload States
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -91,47 +88,19 @@ export default function AdminDashboard() {
     return () => { ignore = true; };
   }, []);
 
-  const handleImageFileChange = async (e: ChangeEvent<HTMLInputElement>, isModal = false) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleCloudinaryUpload = (result: unknown, isModal = false) => {
+    const info = (result as { info?: { secure_url?: string } })?.info;
+    const uploadedUrl = info?.secure_url;
+    if (!uploadedUrl) return;
 
-    setImagePreview(URL.createObjectURL(file));
-    setUploadingImage(true);
-
-    try {
-      const uploadData = new FormData();
-      uploadData.append("file", file);
-
-      const res = await fetch("/api/admin/upload", { method: "POST", body: uploadData });
-      const rawText = await res.text();
-      let data: { url?: string; error?: string };
-
-      try {
-        data = JSON.parse(rawText);
-      } catch {
-        throw new Error(rawText || "Invalid server response");
-      }
-
-      if (res.ok && data.url) {
-        if (isModal && editingProduct) {
-          setEditingProduct({ ...editingProduct, images: [data.url] });
-        } else {
-          setFormData((prev) => ({ ...prev, imageUrl: data.url ?? "" }));
-        }
-      } else {
-        alert(data.error || "Image upload failed. Ensure Vercel Blob storage is configured.");
-        setImagePreview(null);
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error uploading file.";
-      alert(`Upload failed: ${message}`);
-      setImagePreview(null);
-    } finally {
-      setUploadingImage(false);
+    if (isModal && editingProduct) {
+      setEditingProduct({ ...editingProduct, images: [uploadedUrl] });
+    } else {
+      setFormData((prev) => ({ ...prev, imageUrl: uploadedUrl }));
     }
   };
 
-  const handleCreateProduct = async (e: ReactFormEvent<HTMLFormElement>) => {
+  const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const res = await fetch("/api/admin/products", {
@@ -150,7 +119,6 @@ export default function AdminDashboard() {
       if (res.ok) {
         alert("Product published!");
         setFormData({ title: "", description: "", price: "", stock: "", imageUrl: "", category: "gift-boxes" });
-        setImagePreview(null);
         setActiveTab("products");
         void refreshData();
       } else {
@@ -162,26 +130,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const renderPhotoPreview = () => {
-  if (uploadingImage) {
-    return <Loader2 className="animate-spin text-forest" size={20} />;
-  }
-  if (imagePreview) {
-    return (
-      <div className="relative h-16 w-16 overflow-hidden rounded-lg">
-        <Image src={imagePreview} alt="Preview" fill className="object-cover" />
-      </div>
-    );
-  }
-  return (
-    <div className="text-center text-slate-500">
-      <UploadCloud size={20} className="mx-auto text-slate-400" />
-      <span className="font-semibold text-slate-700">Click to pick photo from device</span>
-    </div>
-  );
-};
-
-  const handleSaveFullProductEdit = async (e: ReactFormEvent<HTMLFormElement>) => {
+  const handleSaveFullProductEdit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editingProduct) return;
 
@@ -269,8 +218,6 @@ export default function AdminDashboard() {
           {stock} units
         </span>
       );
-
-
     }
     return (
       <span className="rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-bold text-red-700">
@@ -476,20 +423,28 @@ export default function AdminDashboard() {
                 />
               </div>
             </div>
+
             <div>
-  <label htmlFor="create-photo" className="mb-1 block font-semibold text-slate-700">Product Photo</label>
-  <div className="relative flex min-h-[100px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-4">
-    <input
-      id="create-photo"
-      type="file"
-      accept="image/*"
-      onChange={(e) => handleImageFileChange(e)}
-      className="absolute inset-0 cursor-pointer opacity-0"
-    />
-    {renderPhotoPreview()}
-  </div>
-</div>
-            <button type="submit" disabled={uploadingImage} className="w-full rounded-lg bg-forest py-2.5 font-semibold text-white">
+              <label htmlFor="cloudinary-upload-btn" className="mb-1 block font-semibold text-slate-700">Product Photo</label>
+              <div className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-4">
+                {formData.imageUrl ? (
+                  <div className="relative h-20 w-20 overflow-hidden rounded-lg border border-slate-200 shadow-sm">
+                    <Image src={formData.imageUrl} alt="Uploaded preview" fill className="object-cover" />
+                  </div>
+                ) : null}
+
+                <CldUploadButton
+                  uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                  onSuccess={(res) => handleCloudinaryUpload(res, false)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-forest px-4 py-2 font-semibold text-white shadow-sm hover:bg-forest/90"
+                >
+                  <UploadCloud size={16} />
+                  {formData.imageUrl ? "Change Photo" : "Upload Product Photo"}
+                </CldUploadButton>
+              </div>
+            </div>
+
+            <button type="submit" className="w-full rounded-lg bg-forest py-2.5 font-semibold text-white">
               Publish Item
             </button>
           </form>
@@ -539,16 +494,26 @@ export default function AdminDashboard() {
                   />
                 </div>
               </div>
+
               <div>
-                <label htmlFor="edit-photo" className="mb-1 block font-semibold text-slate-700">Change Photo</label>
-                <input
-                  id="edit-photo"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageFileChange(e, true)}
-                  className="w-full text-xs cursor-pointer"
-                />
+                <label htmlFor="cloudinary-upload-btn" className="mb-1 block font-semibold text-slate-700">Change Photo</label>
+                <div className="flex items-center gap-3">
+                  {editingProduct.images?.[0] ? (
+                    <div className="relative h-12 w-12 overflow-hidden rounded-md border border-slate-200">
+                      <Image src={editingProduct.images[0]} alt="Current Photo" fill className="object-cover" />
+                    </div>
+                  ) : null}
+
+                  <CldUploadButton
+                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                    onSuccess={(res) => handleCloudinaryUpload(res, true)}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Select New Image
+                  </CldUploadButton>
+                </div>
               </div>
+
               <div>
                 <label htmlFor="edit-description" className="mb-1 block font-semibold text-slate-700">Description</label>
                 <textarea

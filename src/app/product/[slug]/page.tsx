@@ -5,7 +5,6 @@ import { ChevronDown } from "lucide-react";
 import { DELIVERY_RATES_CONFIRMED, AVAILABLE_DESTINATIONS } from "@/config/delivery";
 import { SITE } from "@/config/site";
 import { getCatalog, getProductBySlug, getProductsBySlugs, getRelatedProducts, toSummary } from "@/lib/catalog";
-import { STARTER_CATALOG } from "@/lib/catalog/products";
 import { getCategory, getOccasion, getRecipient } from "@/lib/catalog/taxonomy";
 import { formatMoney } from "@/lib/format";
 import { ProductGallery } from "@/components/product/ProductGallery";
@@ -17,11 +16,9 @@ import { Badge, SectionHeading } from "@/components/ui/primitives";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const revalidate = 600;
-
-export function generateStaticParams() {
-  return STARTER_CATALOG.map((p) => ({ slug: p.slug }));
-}
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug((await params).slug);
@@ -80,7 +77,6 @@ export default async function ProductPage({ params }: Props) {
       url: `${SITE.url}/product/${product.slug}`,
       priceCurrency: product.currency,
       price: product.price.toFixed(2),
-      // Availability is only stated when inventory is actually tracked.
       ...(product.stock !== null && {
         availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       }),
@@ -89,7 +85,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="container-page py-6 sm:py-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, String.raw`\u003c`) }} />
       <Breadcrumbs
         items={[
           { href: "/", label: "Home" },

@@ -18,7 +18,7 @@ function getClient(): PrismaClient {
 
   if (!globalForPrisma.prisma) {
     const connectionString = process.env.DATABASE_URL!;
-    const pool = new Pool({ connectionString, connectionTimeoutMillis: 5000 });
+    const pool = new Pool({ connectionString, connectionTimeoutMillis: 3000 });
     const adapter = new PrismaNeon(pool as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
 
     globalForPrisma.prisma = new PrismaClient({
@@ -30,14 +30,12 @@ function getClient(): PrismaClient {
   return globalForPrisma.prisma;
 }
 
-/**
- * Lazily-connected Prisma client. Importing it never throws, so pages can
- * render (with graceful fallbacks) when the database isn't configured.
- */
 export const prisma = new Proxy({} as PrismaClient, {
   get(_target, prop) {
     if (prop === "then") return undefined;
-    if (!isDatabaseConfigured()) return undefined;
+    if (!isDatabaseConfigured()) {
+      return () => Promise.reject(new Error("DATABASE_URL is not configured."));
+    }
     const client = getClient();
     const value = Reflect.get(client, prop);
     return typeof value === "function" ? value.bind(client) : value;

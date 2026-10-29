@@ -15,15 +15,23 @@ function availabilityLabel(stock: number | null) {
   return { text: "In stock", tone: "text-success" };
 }
 
+interface ProductCardProps {
+  product: ProductSummary;
+  priority?: boolean;
+  className?: string;
+}
+
+interface ProductGridProps {
+  products: ProductSummary[];
+  className?: string;
+  priorityCount?: number;
+}
+
 export function ProductCard({
   product,
   priority = false,
   className,
-}: {
-  product: ProductSummary;
-  priority?: boolean;
-  className?: string;
-}) {
+}: Readonly<ProductCardProps>) {
   const image = product.images[0];
   const hoverImage = product.images[1];
   const category = getCategory(product.category);
@@ -87,7 +95,11 @@ export function ProductCard({
   );
 }
 
-export function ProductGrid({ products, className, priorityCount = 0 }: { products: ProductSummary[]; className?: string; priorityCount?: number }) {
+export function ProductGrid({
+  products,
+  className,
+  priorityCount = 0,
+}: Readonly<ProductGridProps>) {
   return (
     <ul className={cn("grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-6", className)}>
       {products.map((product, index) => (

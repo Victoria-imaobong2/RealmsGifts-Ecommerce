@@ -16,13 +16,13 @@ const nextConfig: NextConfig = {
     loader: "custom",
     loaderFile: "./src/lib/image-loader.ts",
   },
-  async redirects() {
+  redirects() {
     return [
       { source: "/catalog", destination: "/shop", permanent: true },
       { source: "/profile", destination: "/account", permanent: true },
     ];
   },
-  async rewrites() {
+  rewrites() {
     return [{ source: "/gifts-for-:recipient", destination: "/recipient/:recipient" }];
   },
 };
