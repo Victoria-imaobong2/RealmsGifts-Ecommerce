@@ -37,8 +37,8 @@ export async function POST(req: Request) {
     }
 
     if (imageUrl && !imageUrl.startsWith("https://")) {
-  return NextResponse.json({ error: "Image URL must start with https://" }, { status: 400 });
-}
+      return NextResponse.json({ error: "Image URL must start with https://" }, { status: 400 });
+    }
 
     let slug = slugify(title);
     if (await prisma.product.findUnique({ where: { slug } })) {

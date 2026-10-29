@@ -1,9 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import ws from "ws";
-
-neonConfig.webSocketConstructor = ws;
+import { Pool } from "@neondatabase/serverless";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
@@ -13,12 +10,17 @@ export function isDatabaseConfigured(): boolean {
 
 function getClient(): PrismaClient {
   if (!isDatabaseConfigured()) {
-    throw new Error("DATABASE_URL is not configured. Prisma operations are unavailable.");
+    throw new Error("DATABASE_URL is missing or empty.");
   }
 
   if (!globalForPrisma.prisma) {
     const connectionString = process.env.DATABASE_URL!;
-    const pool = new Pool({ connectionString, connectionTimeoutMillis: 3000 });
+    const pool = new Pool({
+      connectionString,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    });
     const adapter = new PrismaNeon(pool as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
 
     globalForPrisma.prisma = new PrismaClient({
@@ -34,7 +36,7 @@ export const prisma = new Proxy({} as PrismaClient, {
   get(_target, prop) {
     if (prop === "then") return undefined;
     if (!isDatabaseConfigured()) {
-      return () => Promise.reject(new Error("DATABASE_URL is not configured."));
+      return () => Promise.reject(new Error("DATABASE_URL is not configured in Vercel environment."));
     }
     const client = getClient();
     const value = Reflect.get(client, prop);
