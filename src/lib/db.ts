@@ -10,7 +10,13 @@ function getClient(): PrismaClient {
   if (!isDatabaseConfigured()) {
     throw new Error("DATABASE_URL is not configured. Prisma operations are unavailable.");
   }
-  globalForPrisma.prisma ??= new PrismaClient();
+
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = new PrismaClient({
+      log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    });
+  }
+
   return globalForPrisma.prisma;
 }
 
