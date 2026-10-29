@@ -17,9 +17,10 @@ export async function GET() {
       take: 500,
     });
     return NextResponse.json(orders);
-  } catch (err) {
-    console.error("Orders fetch error:", err);
-    return NextResponse.json({ error: "Failed to load orders" }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to load orders";
+    console.error("Orders fetch error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -45,8 +46,9 @@ export async function PATCH(req: Request) {
     await recordOrderEvent(id, status, "Updated by staff");
 
     return NextResponse.json(updated);
-  } catch (err) {
-    console.error("Order patch error:", err);
-    return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to update order";
+    console.error("Order patch error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
