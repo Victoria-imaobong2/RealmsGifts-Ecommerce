@@ -437,6 +437,7 @@ export default function AdminDashboard() {
   uploadPreset="realmsgifts"
   options={{
     cloudName: "gblta9dr",
+    apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
     sources: ["local", "url", "camera"],
     multiple: false,
     maxFiles: 1,
@@ -530,6 +531,7 @@ export default function AdminDashboard() {
   uploadPreset="realmsgifts"
   options={{
     cloudName: "gblta9dr",
+    apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
     sources: ["local", "url"],
     multiple: false,
     maxFiles: 1,
