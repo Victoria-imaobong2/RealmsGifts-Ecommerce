@@ -9,18 +9,13 @@ export function isDatabaseConfigured(): boolean {
 }
 
 function getClient(): PrismaClient {
-  if (!isDatabaseConfigured()) {
-    throw new Error("DATABASE_URL is missing or empty.");
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is missing from Vercel environment variables.");
   }
 
   if (!globalForPrisma.prisma) {
-    const connectionString = process.env.DATABASE_URL!;
-    const pool = new Pool({
-      connectionString,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
-    });
+    const pool = new Pool({ connectionString });
     const adapter = new PrismaNeon(pool as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
 
     globalForPrisma.prisma = new PrismaClient({
@@ -35,9 +30,6 @@ function getClient(): PrismaClient {
 export const prisma = new Proxy({} as PrismaClient, {
   get(_target, prop) {
     if (prop === "then") return undefined;
-    if (!isDatabaseConfigured()) {
-      return () => Promise.reject(new Error("DATABASE_URL is not configured in Vercel environment."));
-    }
     const client = getClient();
     const value = Reflect.get(client, prop);
     return typeof value === "function" ? value.bind(client) : value;
