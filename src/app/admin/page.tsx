@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo, type FormEvent, type ChangeEvent } from "react";
+import { useState, useEffect, useMemo, type ChangeEvent, type FormEvent as ReactFormEvent } from "react";
 import Image from "next/image";
 import { PlusCircle, Search, UploadCloud, Loader2, Edit, X } from "lucide-react";
-import { CATEGORIES } from "@/lib/catalog/taxonomy";
 import { formatMoney } from "@/lib/format";
 import { STATUS_LABELS } from "@/lib/order-status";
 
@@ -33,12 +32,11 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<"products" | "orders" | "add-product">("products");
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [sortBy, setSortBy] = useState<SortOption>("date-desc");
+  const [statusFilter] = useState("ALL");
+  const [sortBy] = useState<SortOption>("date-desc");
 
   // Inline Stock Edit
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
@@ -87,11 +85,9 @@ export default function AdminDashboard() {
         if (orderRes.ok) setOrders(await orderRes.json());
       } catch (err) {
         console.error("Load failed:", err);
-      } finally {
-        if (!ignore) setLoading(false);
       }
     }
-    initialFetch();
+    void initialFetch();
     return () => { ignore = true; };
   }, []);
 
@@ -107,27 +103,35 @@ export default function AdminDashboard() {
       uploadData.append("file", file);
 
       const res = await fetch("/api/admin/upload", { method: "POST", body: uploadData });
-      const data = await res.json();
+      const rawText = await res.text();
+      let data: { url?: string; error?: string };
+
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error(rawText || "Invalid server response");
+      }
 
       if (res.ok && data.url) {
         if (isModal && editingProduct) {
           setEditingProduct({ ...editingProduct, images: [data.url] });
         } else {
-          setFormData((prev) => ({ ...prev, imageUrl: data.url }));
+          setFormData((prev) => ({ ...prev, imageUrl: data.url ?? "" }));
         }
       } else {
         alert(data.error || "Image upload failed. Ensure Vercel Blob storage is configured.");
         setImagePreview(null);
       }
-    } catch {
-      alert("Error uploading file.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error uploading file.";
+      alert(`Upload failed: ${message}`);
       setImagePreview(null);
     } finally {
       setUploadingImage(false);
     }
   };
 
-  const handleCreateProduct = async (e: FormEvent<HTMLFormElement>) => {
+  const handleCreateProduct = async (e: ReactFormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const res = await fetch("/api/admin/products", {
@@ -148,7 +152,7 @@ export default function AdminDashboard() {
         setFormData({ title: "", description: "", price: "", stock: "", imageUrl: "", category: "gift-boxes" });
         setImagePreview(null);
         setActiveTab("products");
-        refreshData();
+        void refreshData();
       } else {
         const data = await res.json();
         alert(data.error || "Failed to add product.");
@@ -158,7 +162,26 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSaveFullProductEdit = async (e: FormEvent<HTMLFormElement>) => {
+  const renderPhotoPreview = () => {
+  if (uploadingImage) {
+    return <Loader2 className="animate-spin text-forest" size={20} />;
+  }
+  if (imagePreview) {
+    return (
+      <div className="relative h-16 w-16 overflow-hidden rounded-lg">
+        <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+      </div>
+    );
+  }
+  return (
+    <div className="text-center text-slate-500">
+      <UploadCloud size={20} className="mx-auto text-slate-400" />
+      <span className="font-semibold text-slate-700">Click to pick photo from device</span>
+    </div>
+  );
+};
+
+  const handleSaveFullProductEdit = async (e: ReactFormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editingProduct) return;
 
@@ -180,7 +203,7 @@ export default function AdminDashboard() {
       if (res.ok) {
         alert("Product updated!");
         setEditingProduct(null);
-        refreshData();
+        void refreshData();
       } else {
         alert("Failed to update product details.");
       }
@@ -239,6 +262,23 @@ export default function AdminDashboard() {
       });
   }, [orders, searchQuery, statusFilter, sortBy]);
 
+  const renderStockBadge = (stock: number) => {
+    if (stock > 0) {
+      return (
+        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
+          {stock} units
+        </span>
+      );
+
+
+    }
+    return (
+      <span className="rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-bold text-red-700">
+        Out of stock
+      </span>
+    );
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -293,9 +333,11 @@ export default function AdminDashboard() {
                     {editingStockId === prod.id ? (
                       <div className="inline-flex items-center gap-2">
                         <input
+                          id={`stock-input-${prod.id}`}
+                          aria-label={`Stock quantity for ${prod.title}`}
                           type="number"
                           value={tempStockValue}
-                          onChange={(e) => setTempStockValue(parseInt(e.target.value, 10) || 0)}
+                          onChange={(e) => setTempStockValue(Number.parseInt(e.target.value, 10) || 0)}
                           className="w-16 rounded border border-slate-300 p-1 text-center"
                         />
                         <button
@@ -307,9 +349,7 @@ export default function AdminDashboard() {
                         </button>
                       </div>
                     ) : (
-                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${prod.stock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
-                        {prod.stock > 0 ? `${prod.stock} units` : "Out of stock"}
-                      </span>
+                      renderStockBadge(prod.stock)
                     )}
                   </td>
                   <td className="p-4 text-right space-x-2">
@@ -342,6 +382,7 @@ export default function AdminDashboard() {
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-2.5 text-slate-400" size={14} />
               <input
+                id="search-orders"
                 type="text"
                 placeholder="Search order number..."
                 value={searchQuery}
@@ -398,8 +439,9 @@ export default function AdminDashboard() {
           <h2 className="mb-4 text-base font-bold text-slate-900">Add Item to Catalog</h2>
           <form onSubmit={handleCreateProduct} className="space-y-4 text-xs">
             <div>
-              <label className="mb-1 block font-semibold text-slate-700">Product Title</label>
+              <label htmlFor="create-title" className="mb-1 block font-semibold text-slate-700">Product Title</label>
               <input
+                id="create-title"
                 required
                 type="text"
                 value={formData.title}
@@ -410,8 +452,9 @@ export default function AdminDashboard() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block font-semibold text-slate-700">Price (NGN ₦)</label>
+                <label htmlFor="create-price" className="mb-1 block font-semibold text-slate-700">Price (NGN ₦)</label>
                 <input
+                  id="create-price"
                   required
                   type="number"
                   value={formData.price}
@@ -421,8 +464,9 @@ export default function AdminDashboard() {
                 />
               </div>
               <div>
-                <label className="mb-1 block font-semibold text-slate-700">Initial Stock</label>
+                <label htmlFor="create-stock" className="mb-1 block font-semibold text-slate-700">Initial Stock</label>
                 <input
+                  id="create-stock"
                   required
                   type="number"
                   value={formData.stock}
@@ -433,23 +477,18 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block font-semibold text-slate-700">Product Photo</label>
-              <div className="relative flex min-h-[100px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-4">
-                <input type="file" accept="image/*" onChange={(e) => handleImageFileChange(e)} className="absolute inset-0 opacity-0" />
-                {uploadingImage ? (
-                  <Loader2 className="animate-spin text-forest" size={20} />
-                ) : imagePreview ? (
-                  <div className="relative h-16 w-16 overflow-hidden rounded-lg">
-                    <Image src={imagePreview} alt="Preview" fill className="object-cover" />
-                  </div>
-                ) : (
-                  <div className="text-center text-slate-500">
-                    <UploadCloud size={20} className="mx-auto text-slate-400" />
-                    <span className="font-semibold text-slate-700">Click to pick photo from device</span>
-                  </div>
-                )}
-              </div>
-            </div>
+  <label htmlFor="create-photo" className="mb-1 block font-semibold text-slate-700">Product Photo</label>
+  <div className="relative flex min-h-[100px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-4">
+    <input
+      id="create-photo"
+      type="file"
+      accept="image/*"
+      onChange={(e) => handleImageFileChange(e)}
+      className="absolute inset-0 cursor-pointer opacity-0"
+    />
+    {renderPhotoPreview()}
+  </div>
+</div>
             <button type="submit" disabled={uploadingImage} className="w-full rounded-lg bg-forest py-2.5 font-semibold text-white">
               Publish Item
             </button>
@@ -463,14 +502,15 @@ export default function AdminDashboard() {
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between border-b pb-3">
               <h3 className="font-serif text-lg font-bold text-slate-900">Edit Product: {editingProduct.title}</h3>
-              <button onClick={() => setEditingProduct(null)} className="text-slate-400 hover:text-slate-600">
+              <button type="button" onClick={() => setEditingProduct(null)} className="text-slate-400 hover:text-slate-600">
                 <X size={18} />
               </button>
             </div>
             <form onSubmit={handleSaveFullProductEdit} className="space-y-4 text-xs">
               <div>
-                <label className="mb-1 block font-semibold text-slate-700">Title</label>
+                <label htmlFor="edit-title" className="mb-1 block font-semibold text-slate-700">Title</label>
                 <input
+                  id="edit-title"
                   type="text"
                   value={editingProduct.title}
                   onChange={(e) => setEditingProduct({ ...editingProduct, title: e.target.value })}
@@ -479,31 +519,40 @@ export default function AdminDashboard() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block font-semibold text-slate-700">Price (NGN ₦)</label>
+                  <label htmlFor="edit-price" className="mb-1 block font-semibold text-slate-700">Price (NGN ₦)</label>
                   <input
+                    id="edit-price"
                     type="number"
                     value={editingProduct.price}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, price: Number.parseFloat(e.target.value) || 0 })}
                     className="w-full rounded-lg border border-slate-200 p-2.5"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block font-semibold text-slate-700">Stock</label>
+                  <label htmlFor="edit-stock" className="mb-1 block font-semibold text-slate-700">Stock</label>
                   <input
+                    id="edit-stock"
                     type="number"
                     value={editingProduct.stock}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, stock: parseInt(e.target.value, 10) || 0 })}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, stock: Number.parseInt(e.target.value, 10) || 0 })}
                     className="w-full rounded-lg border border-slate-200 p-2.5"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block font-semibold text-slate-700">Change Photo</label>
-                <input type="file" accept="image/*" onChange={(e) => handleImageFileChange(e, true)} className="w-full text-xs" />
+                <label htmlFor="edit-photo" className="mb-1 block font-semibold text-slate-700">Change Photo</label>
+                <input
+                  id="edit-photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageFileChange(e, true)}
+                  className="w-full text-xs cursor-pointer"
+                />
               </div>
               <div>
-                <label className="mb-1 block font-semibold text-slate-700">Description</label>
+                <label htmlFor="edit-description" className="mb-1 block font-semibold text-slate-700">Description</label>
                 <textarea
+                  id="edit-description"
                   rows={3}
                   value={editingProduct.description || ""}
                   onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}

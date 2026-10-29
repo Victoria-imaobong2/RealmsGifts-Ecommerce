@@ -36,9 +36,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Please provide a title, a price above ₦0, and a valid stock quantity." }, { status: 400 });
     }
 
-    if (imageUrl && !/^https:\/\//.test(imageUrl)) {
-      return NextResponse.json({ error: "Image URL must start with https://" }, { status: 400 });
-    }
+    if (imageUrl && !imageUrl.startsWith("https://")) {
+  return NextResponse.json({ error: "Image URL must start with https://" }, { status: 400 });
+}
 
     let slug = slugify(title);
     if (await prisma.product.findUnique({ where: { slug } })) {
