@@ -8,18 +8,17 @@ neonConfig.webSocketConstructor = ws;
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 export function isDatabaseConfigured(): boolean {
-  return Boolean(process.env.DATABASE_URL);
+  return Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== "");
 }
 
 function getClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
+  if (!isDatabaseConfigured()) {
     throw new Error("DATABASE_URL is not configured. Prisma operations are unavailable.");
   }
 
   if (!globalForPrisma.prisma) {
-    const pool = new Pool({ connectionString });
+    const connectionString = process.env.DATABASE_URL!;
+    const pool = new Pool({ connectionString, connectionTimeoutMillis: 5000 });
     const adapter = new PrismaNeon(pool as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
 
     globalForPrisma.prisma = new PrismaClient({
@@ -38,6 +37,7 @@ function getClient(): PrismaClient {
 export const prisma = new Proxy({} as PrismaClient, {
   get(_target, prop) {
     if (prop === "then") return undefined;
+    if (!isDatabaseConfigured()) return undefined;
     const client = getClient();
     const value = Reflect.get(client, prop);
     return typeof value === "function" ? value.bind(client) : value;
