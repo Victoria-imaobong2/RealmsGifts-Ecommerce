@@ -3,7 +3,6 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import { Pool, neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 
-// Set WebSocket engine for Node/Serverless environment
 neonConfig.webSocketConstructor = ws;
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
@@ -21,7 +20,7 @@ function getClient(): PrismaClient {
 
   if (!globalForPrisma.prisma) {
     const pool = new Pool({ connectionString });
-    const adapter = new PrismaNeon(pool);
+    const adapter = new PrismaNeon(pool as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
 
     globalForPrisma.prisma = new PrismaClient({
       adapter,
