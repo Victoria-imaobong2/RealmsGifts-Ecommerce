@@ -9,9 +9,10 @@ export function isDatabaseConfigured(): boolean {
 }
 
 function getClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
   if (!connectionString) {
-    throw new Error("DATABASE_URL is missing from environment variables.");
+    throw new Error("DATABASE_URL is missing from Vercel environment variables. Please check your Vercel dashboard settings.");
   }
 
   if (!globalForPrisma.prisma) {
