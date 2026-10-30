@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo} from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { PlusCircle, Search, UploadCloud, Edit, X } from "lucide-react";
 import { formatMoney } from "@/lib/format";
@@ -425,7 +425,7 @@ export default function AdminDashboard() {
             </div>
 
             <div>
-              <label htmlFor="cloudinary-upload-btn" className="mb-1 block font-semibold text-slate-700">Product Photo</label>
+              <label htmlFor="create-photo" className="mb-1 block font-semibold text-slate-700">Product Photo</label>
               <div className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-4">
                 {formData.imageUrl ? (
                   <div className="relative h-20 w-20 overflow-hidden rounded-lg border border-slate-200 shadow-sm">
@@ -434,37 +434,17 @@ export default function AdminDashboard() {
                 ) : null}
 
                 <CldUploadButton
-  uploadPreset="realmsgifts"
-  options={{
-    cloudName: "gblta9dr",
-    apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-    sources: ["local", "url", "camera"],
-    multiple: false,
-    maxFiles: 1,
-    clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "avif"],
-    maxFileSize: 10000000, // 10MB
-    styles: {
-      palette: {
-        window: "#FFFFFF",
-        windowBorder: "#90A4AE",
-        tabIcon: "#0F5257",
-        menuBg: "#FFFFFF",
-        link: "#0F5257",
-        action: "#0F5257",
-        inactiveTabIcon: "#556A7B",
-        error: "#F44236",
-        inProgress: "#0078FF",
-        complete: "#20B832",
-        sourceBg: "#F4F6F8",
-      },
-    },
-  }}
-  onSuccess={(res) => handleCloudinaryUpload(res, false)}
-  className="inline-flex items-center gap-2 rounded-lg bg-forest px-4 py-2 font-semibold text-white shadow-sm hover:bg-forest/90"
->
-  <UploadCloud size={16} />
-  {formData.imageUrl ? "Change Photo" : "Upload Product Photo"}
-</CldUploadButton>
+                  uploadPreset="realmsgifts"
+                  options={{
+                    cloudName: "gblta9dr",
+                    maxFiles: 1,
+                  }}
+                  onSuccess={(res) => handleCloudinaryUpload(res, false)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-forest px-4 py-2 font-semibold text-white shadow-sm hover:bg-forest/90"
+                >
+                  <UploadCloud size={16} />
+                  {formData.imageUrl ? "Change Photo" : "Upload Product Photo"}
+                </CldUploadButton>
               </div>
             </div>
 
@@ -520,39 +500,25 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label htmlFor="cloudinary-upload-btn" className="mb-1 block font-semibold text-slate-700">Change Photo</label>
+                <label htmlFor="edit-photo" className="mb-1 block font-semibold text-slate-700">Change Photo</label>
                 <div className="flex items-center gap-3">
                   {editingProduct.images?.[0] ? (
                     <div className="relative h-12 w-12 overflow-hidden rounded-md border border-slate-200">
                       <Image src={editingProduct.images[0]} alt="Current Photo" fill className="object-cover" />
                     </div>
                   ) : null}
-<CldUploadButton
-  uploadPreset="realmsgifts"
-  options={{
-    cloudName: "gblta9dr",
-    apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-    sources: ["local", "url"],
-    multiple: false,
-    maxFiles: 1,
-    clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "avif"],
-    styles: {
-      palette: {
-        window: "#FFFFFF",
-        windowBorder: "#90A4AE",
-        tabIcon: "#0F5257",
-        menuBg: "#FFFFFF",
-        link: "#0F5257",
-        action: "#0F5257",
-        sourceBg: "#F4F6F8",
-      },
-    },
-  }}
-  onSuccess={(res) => handleCloudinaryUpload(res, true)}
-  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50"
->
-  Select New Image
-</CldUploadButton>
+                  <CldUploadButton
+                    uploadPreset="realmsgifts"
+                    options={{
+                      cloudName: "gblta9dr",
+                      multiple: false,
+                      maxFiles: 1,
+                    }}
+                    onSuccess={(res) => handleCloudinaryUpload(res, true)}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Select New Image
+                  </CldUploadButton>
                 </div>
               </div>
 

@@ -11,7 +11,7 @@ export function isDatabaseConfigured(): boolean {
 function getClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
-    throw new Error("DATABASE_URL is missing from Vercel environment variables.");
+    throw new Error("DATABASE_URL is missing from environment variables.");
   }
 
   if (!globalForPrisma.prisma) {
