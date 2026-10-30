@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { Pool } from "@neondatabase/serverless";
+import { PrismaNeonHttp } from "@prisma/adapter-neon";
+import { neon } from "@neondatabase/serverless";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
@@ -12,12 +12,15 @@ function getClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
   if (!connectionString) {
-    throw new Error("DATABASE_URL is missing from Vercel environment variables. Please check your Vercel dashboard settings.");
+    throw new Error("DATABASE_URL is missing from environment variables.");
   }
 
   if (!globalForPrisma.prisma) {
-    const pool = new Pool({ connectionString });
-    const adapter = new PrismaNeon(pool as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
+    const sql = neon(connectionString);
+    
+    // Pass empty options object {} as 2nd argument to satisfy driver types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const adapter = new PrismaNeonHttp(sql as any, {});
 
     globalForPrisma.prisma = new PrismaClient({
       adapter,

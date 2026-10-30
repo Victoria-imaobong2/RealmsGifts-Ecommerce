@@ -434,17 +434,13 @@ export default function AdminDashboard() {
                 ) : null}
 
                 <CldUploadButton
-                  uploadPreset="realmsgifts"
-                  options={{
-                    cloudName: "gblta9dr",
-                    maxFiles: 1,
-                  }}
-                  onSuccess={(res) => handleCloudinaryUpload(res, false)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-forest px-4 py-2 font-semibold text-white shadow-sm hover:bg-forest/90"
-                >
-                  <UploadCloud size={16} />
-                  {formData.imageUrl ? "Change Photo" : "Upload Product Photo"}
-                </CldUploadButton>
+  uploadPreset="realmsgifts"
+  onSuccess={(res) => handleCloudinaryUpload(res, false)}
+  className="inline-flex items-center gap-2 rounded-lg bg-forest px-4 py-2 font-semibold text-white shadow-sm hover:bg-forest/90"
+>
+  <UploadCloud size={16} />
+  {formData.imageUrl ? "Change Photo" : "Upload Product Photo"}
+</CldUploadButton>
               </div>
             </div>
 
@@ -508,17 +504,12 @@ export default function AdminDashboard() {
                     </div>
                   ) : null}
                   <CldUploadButton
-                    uploadPreset="realmsgifts"
-                    options={{
-                      cloudName: "gblta9dr",
-                      multiple: false,
-                      maxFiles: 1,
-                    }}
-                    onSuccess={(res) => handleCloudinaryUpload(res, true)}
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    Select New Image
-                  </CldUploadButton>
+  uploadPreset="realmsgifts"
+  onSuccess={(res) => handleCloudinaryUpload(res, true)}
+  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50"
+>
+  Select New Image
+</CldUploadButton>
                 </div>
               </div>
 
