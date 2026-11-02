@@ -7,13 +7,16 @@ import type { Product } from "./types";
 type Input = Omit<Product, "id" | "currency" | "source" | "giftWrap" | "sameDayEligible" | "stock"> &
   Partial<Pick<Product, "giftWrap" | "sameDayEligible" | "stock">>;
 
+/** The local and international gift items are stocked at 25 pieces each. */
+const GIFT_ITEM_STOCK = 25;
+
 const p = (input: Input): Product => ({
   id: input.slug,
   currency: "NGN",
   source: "starter",
   giftWrap: true,
   sameDayEligible: false,
-  stock: null,
+  stock: /-(local|intl)$/.test(input.slug) ? GIFT_ITEM_STOCK : null,
   ...input,
 });
 
