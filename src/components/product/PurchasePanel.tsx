@@ -9,6 +9,7 @@ import type { Product } from "@/lib/catalog/types";
 import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/format";
 import { useHydrated } from "@/lib/hooks";
+import { useDeliveryRates } from "@/lib/use-delivery-rates";
 import { useCartStore } from "@/store/useCartStore";
 import { useDestinationStore } from "@/store/useDestinationStore";
 import { useUiStore } from "@/store/useUiStore";
@@ -24,6 +25,7 @@ type PurchaseProduct = Pick<
 function DeliveryCheck({ product }: { product: PurchaseProduct }) {
   const hydrated = useHydrated();
   const { country, region } = useDestinationStore();
+  const deliveryRates = useDeliveryRates();
   const destination = getDestination(hydrated ? country : "US");
   if (!destination) return null;
 
@@ -35,7 +37,7 @@ function DeliveryCheck({ product }: { product: PurchaseProduct }) {
       </p>
     );
   }
-  const methods = getMethodAvailability(destination.code, region || undefined, [product]);
+  const methods = getMethodAvailability(destination.code, region || undefined, [product], new Date(), deliveryRates);
   const cheapest = methods.filter((m) => m.available).sort((a, b) => a.method.price - b.method.price)[0];
   const sameDay = methods.find((m) => m.method.id === "same-day");
 

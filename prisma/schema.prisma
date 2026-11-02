@@ -183,3 +183,18 @@ model NewsletterSubscriber {
   email     String   @unique
   createdAt DateTime @default(now())
 }
+
+/// Admin-managed delivery fee. destination "*" is the default for every country
+/// (always NGN); a country code overrides it for that country, optionally in a
+/// foreign currency converted to NGN at ngnRate (1 unit of currency = ngnRate NGN).
+model DeliveryRate {
+  id          String   @id @default(cuid())
+  destination String
+  methodId    String
+  price       Float
+  currency    String   @default("NGN")
+  ngnRate     Float    @default(1)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([destination, methodId])
+}

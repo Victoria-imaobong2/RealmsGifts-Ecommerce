@@ -12,11 +12,17 @@ export const GIFT_WRAP_FEE = 5000;
 
 export type DeliveryMethodId = "standard" | "express" | "same-day" | "scheduled";
 
+export const DELIVERY_METHOD_IDS: DeliveryMethodId[] = ["standard", "express", "same-day", "scheduled"];
+
 export interface DeliveryMethod {
   id: DeliveryMethodId;
   label: string;
   description: string;
+  /** Fee in NGN — what the customer is charged. */
   price: number;
+  /** Set when the admin priced this in a foreign currency: the amount in that currency. */
+  localPrice?: number;
+  localCurrency?: string;
   minDays: number;
   maxDays: number;
   cutoffHour?: number;
@@ -29,6 +35,8 @@ export interface Destination {
   code: string;
   name: string;
   flag: string;
+  /** ISO 4217 code of the country's own currency (used when the admin overrides its rates). */
+  currency: string;
   status: "available" | "coming-soon";
   addressFormat: AddressFormat;
   timeZone: string;
@@ -81,6 +89,7 @@ export const DESTINATIONS: Destination[] = countries
     code: c.cca2,
     name: c.name.common,
     flag: c.flag,
+    currency: Object.keys(c.currencies ?? {})[0] ?? "NGN",
     status: "available" as const,
     addressFormat: (c.cca2 === "US" ? "US" : "GENERIC") as AddressFormat,
     timeZone: (c as { timezones?: string[] }).timezones?.[0] || "UTC",
@@ -123,15 +132,50 @@ export interface MethodAvailability {
   reason?: string;
 }
 
+/** One admin-set fee. destination "*" is the all-countries default (always NGN). */
+export interface DeliveryRateEntry {
+  destination: string;
+  methodId: string;
+  price: number;
+  currency: string;
+  /** 1 unit of `currency` in NGN. */
+  ngnRate: number;
+}
+
+const roundNgn = (value: number) => Math.round(value * 100) / 100;
+
+/**
+ * The destination's methods with the admin's fees applied: a country override
+ * wins over the all-countries default, which wins over the built-in price.
+ * Override fees in a foreign currency are converted to NGN at the admin's rate.
+ */
+export function applyDeliveryRates(destination: Destination, rates: DeliveryRateEntry[] = []): DeliveryMethod[] {
+  return destination.methods.map((method) => {
+    const override = rates.find((r) => r.destination === destination.code && r.methodId === method.id);
+    if (override) {
+      if (override.currency === "NGN") return { ...method, price: roundNgn(override.price) };
+      return {
+        ...method,
+        price: roundNgn(override.price * override.ngnRate),
+        localPrice: override.price,
+        localCurrency: override.currency,
+      };
+    }
+    const fallback = rates.find((r) => r.destination === "*" && r.methodId === method.id);
+    return fallback ? { ...method, price: roundNgn(fallback.price) } : method;
+  });
+}
+
 export function getMethodAvailability(
   destinationCode: string,
   region: string | undefined,
   items: { sameDayEligible: boolean }[],
   now = new Date(),
+  rates: DeliveryRateEntry[] = [],
 ): MethodAvailability[] {
   const destination = getDestination(destinationCode);
   if (!destination || destination.status !== "available") return [];
-  return destination.methods.map((method) => {
+  return applyDeliveryRates(destination, rates).map((method) => {
     if (method.id !== "same-day") return { method, available: true };
     const { hour, weekend } = zonedNow(destination.timeZone, now);
     if (weekend || (method.cutoffHour !== undefined && hour >= method.cutoffHour)) {

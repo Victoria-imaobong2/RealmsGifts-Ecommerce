@@ -4,12 +4,14 @@ import { CalendarClock, CheckCircle2, Clock, MapPin, Truck } from "lucide-react"
 import {
   DELIVERY_RATES_CONFIRMED,
   DESTINATIONS,
+  applyDeliveryRates,
   estimateArrival,
   getDestination,
   type DeliveryMethodId,
 } from "@/config/delivery";
 import { formatDateRange, formatMoney } from "@/lib/format";
 import { useHydrated } from "@/lib/hooks";
+import { useDeliveryRates } from "@/lib/use-delivery-rates";
 import { useDestinationStore } from "@/store/useDestinationStore";
 import { Field, Input, Select } from "@/components/ui/primitives";
 
@@ -25,6 +27,8 @@ export function DestinationSelector() {
   const { country, region, postalCode, set } = useDestinationStore();
   const destination = getDestination(hydrated ? country : "US") ?? DESTINATIONS[0];
   const regionName = destination.regions?.find((r) => r.code === region)?.name;
+  const deliveryRates = useDeliveryRates();
+  const methods = applyDeliveryRates(destination, deliveryRates);
 
   return (
     <div className="rounded-3xl border border-line bg-white p-5 shadow-[var(--shadow-card)] sm:p-8">
@@ -95,7 +99,7 @@ export function DestinationSelector() {
               {destination.name}:
             </p>
             <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-              {destination.methods.map((method) => {
+              {methods.map((method) => {
                 const Icon = METHOD_ICONS[method.id];
                 const { earliest, latest } = estimateArrival(method);
                 const sameDayLimited = method.id === "same-day" && method.regions && region && !method.regions.includes(region);
@@ -105,7 +109,12 @@ export function DestinationSelector() {
                     <div className="min-w-0 text-sm">
                       <p className="flex flex-wrap items-baseline justify-between gap-x-3 font-medium text-ink">
                         {method.label}
-                        <span className="font-semibold">{formatMoney(method.price)}</span>
+                        <span className="font-semibold">
+                          {formatMoney(method.price)}
+                          {method.localCurrency && method.localPrice !== undefined && (
+                            <span className="ml-1 text-xs font-normal text-muted">({formatMoney(method.localPrice, method.localCurrency)})</span>
+                          )}
+                        </span>
                       </p>
                       <p className="mt-0.5 text-muted">
                         {sameDayLimited

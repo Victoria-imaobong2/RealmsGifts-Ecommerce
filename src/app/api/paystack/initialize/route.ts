@@ -9,6 +9,7 @@ import {
 import { getCurrentUser, isValidEmail, normalizeEmail } from "@/lib/auth";
 import { getProductBySlug } from "@/lib/catalog";
 import { isAvailable } from "@/lib/catalog/query";
+import { getDeliveryRates } from "@/lib/delivery-rates";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 import {
   generateOrderNumber,
@@ -165,7 +166,7 @@ export async function POST(req: Request) {
 
     // ── Delivery ───────────────────────────────────────────────────────────
     const methodId = str(body.deliveryMethod, 20) as DeliveryMethodId;
-    const availability = getMethodAvailability(destination.code, address.region, eligibility).find(
+    const availability = getMethodAvailability(destination.code, address.region, eligibility, new Date(), await getDeliveryRates()).find(
       (entry) => entry.method.id === methodId,
     );
     if (!availability) throw new CheckoutError("Please choose a delivery option.");

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { DELIVERY_RATES_CONFIRMED, DESTINATIONS, GIFT_WRAP_FEE, destinationSupportsSameDay } from "@/config/delivery";
+import { DELIVERY_RATES_CONFIRMED, DESTINATIONS, GIFT_WRAP_FEE, applyDeliveryRates, destinationSupportsSameDay } from "@/config/delivery";
+import { getDeliveryRates } from "@/lib/delivery-rates";
 import { formatMoney } from "@/lib/format";
 import { InfoPage } from "@/components/layout/InfoPage";
 
@@ -9,7 +10,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/delivery" },
 };
 
-export default function DeliveryPage() {
+export default async function DeliveryPage() {
+  const deliveryRates = await getDeliveryRates();
   return (
     <InfoPage
       eyebrow="Delivery"
@@ -39,7 +41,7 @@ export default function DeliveryPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {destination.methods.map((method) => (
+                  {applyDeliveryRates(destination, deliveryRates).map((method) => (
                     <tr key={method.id}>
                       <td className="p-3 text-ink">{method.label}</td>
                       <td className="p-3">
@@ -49,7 +51,10 @@ export default function DeliveryPage() {
                             ? `Choose a date ${method.minDays}+ business days ahead`
                             : `${method.minDays}–${method.maxDays} business days`}
                       </td>
-                      <td className="p-3 text-ink">{formatMoney(method.price)}</td>
+                      <td className="p-3 text-ink">
+                        {formatMoney(method.price)}
+                        {method.localCurrency && method.localPrice !== undefined && ` (${formatMoney(method.localPrice, method.localCurrency)})`}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/cn";
 import { formatDateRange, formatMoney } from "@/lib/format";
 import { useHydrated } from "@/lib/hooks";
+import { useDeliveryRates } from "@/lib/use-delivery-rates";
 import { computeTotals } from "@/lib/pricing";
 import { isValidPhone, isValidUsZip } from "@/lib/validation";
 import { cartSubtotal, useCartStore } from "@/store/useCartStore";
@@ -98,9 +99,10 @@ export default function CheckoutPage() {
   }, [hydrated, destinationPrefs]);
 
   const destination = getDestination(country)!;
+  const deliveryRates = useDeliveryRates();
   const availability = useMemo(
-    () => getMethodAvailability(country, address.region || undefined, items),
-    [country, address.region, items],
+    () => getMethodAvailability(country, address.region || undefined, items, new Date(), deliveryRates),
+    [country, address.region, items, deliveryRates],
   );
   const selected = availability.find((a) => a.method.id === methodId && a.available);
   const subtotal = cartSubtotal(items);
@@ -323,7 +325,7 @@ export default function CheckoutPage() {
                       <span className="flex-1 text-sm">
                         <span className="flex flex-wrap justify-between gap-2 font-medium text-ink">
                           {method.label}
-                          <span>{formatMoney(method.price)}</span>
+                          <span>{formatMoney(method.price)}{method.localCurrency && method.localPrice !== undefined && <span className="ml-1 text-xs font-normal text-muted">({formatMoney(method.localPrice, method.localCurrency)})</span>}</span>
                         </span>
                         <span className="mt-0.5 block text-muted">
                           {!available

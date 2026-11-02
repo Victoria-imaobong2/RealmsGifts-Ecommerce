@@ -6,6 +6,7 @@ import { PlusCircle, Search, UploadCloud, Edit, X } from "lucide-react";
 import { formatMoney } from "@/lib/format";
 import { STATUS_LABELS } from "@/lib/order-status";
 import { CldUploadButton } from "next-cloudinary";
+import { DeliveryRatesManager } from "@/components/admin/DeliveryRatesManager";
 
 interface Product {
   id: string;
@@ -30,7 +31,7 @@ const STAFF_STATUSES = ["PENDING", "PREPARING", "READY_FOR_DELIVERY", "DISPATCHE
 type SortOption = "date-desc" | "date-asc" | "amount-high" | "amount-low";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"products" | "orders" | "add-product">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "orders" | "delivery" | "add-product">("products");
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
 
@@ -254,6 +255,13 @@ export default function AdminDashboard() {
           </button>
           <button
             type="button"
+            onClick={() => setActiveTab("delivery")}
+            className={`rounded-lg px-4 py-2 transition ${activeTab === "delivery" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"}`}
+          >
+            Delivery
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab("add-product")}
             className={`flex items-center gap-1.5 rounded-lg px-4 py-2 transition ${activeTab === "add-product" ? "bg-forest text-white shadow-sm" : "text-slate-500"}`}
           >
@@ -324,6 +332,9 @@ export default function AdminDashboard() {
           </table>
         </div>
       )}
+
+      {/* DELIVERY TAB */}
+      {activeTab === "delivery" && <DeliveryRatesManager />}
 
       {/* ORDERS TAB */}
       {activeTab === "orders" && (
