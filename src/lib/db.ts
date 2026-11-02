@@ -8,12 +8,20 @@ export function isDatabaseConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== "");
 }
 
-function getClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+/** Cleans common paste mistakes: surrounding quotes/whitespace, a `psql '...'` wrapper, and SQLAlchemy-style `+driver` schemes. */
+function normalizeConnectionString(raw: string): string {
+  const url = raw.match(/postgres(?:ql)?(?:\+\w+)?:\/\/[^\s'"]+/i)?.[0] ?? raw.trim();
+  return url.replace(/^(postgres(?:ql)?)\+\w+:\/\//i, "$1://");
+}
 
-  if (!connectionString) {
+function getClient(): PrismaClient {
+  const rawConnectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
+  if (!rawConnectionString) {
     throw new Error("DATABASE_URL is missing from environment variables.");
   }
+
+  const connectionString = normalizeConnectionString(rawConnectionString);
 
   if (!globalForPrisma.prisma) {
     const sql = neon(connectionString);
