@@ -50,7 +50,10 @@ export async function POST(req: Request) {
     const totalVariants = variantColors.length * variantSizes.length;
     const variantStock = Math.floor(parsedStock / totalVariants);
 
-    const product = await prisma.product.create({
+    // PrismaNeonHttp has no interactive transactions, and a nested
+    // `variants: { create }` write needs one. Create the product and its
+    // variants as two separate statements instead.
+    const created = await prisma.product.create({
       data: {
         title,
         slug,
@@ -59,16 +62,27 @@ export async function POST(req: Request) {
         price: parsedPrice,
         stock: parsedStock,
         images: imageUrl ? [imageUrl] : [],
-        variants: {
-          create: variantColors.flatMap((color) =>
-            variantSizes.map((size) => ({
-              color,
-              size,
-              stock: Number.isNaN(variantStock) ? 0 : variantStock,
-            }))
-          ),
-        },
       },
+    });
+
+    try {
+      await prisma.productVariant.createMany({
+        data: variantColors.flatMap((color) =>
+          variantSizes.map((size) => ({
+            productId: created.id,
+            color,
+            size,
+            stock: Number.isNaN(variantStock) ? 0 : variantStock,
+          }))
+        ),
+      });
+    } catch (variantError) {
+      await prisma.product.delete({ where: { id: created.id } }).catch(() => undefined);
+      throw variantError;
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id: created.id },
       include: { variants: true },
     });
 
