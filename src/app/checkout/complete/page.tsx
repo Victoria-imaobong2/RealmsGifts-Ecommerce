@@ -1,14 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AlertTriangle, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { getDestination } from "@/config/delivery";
 import { isDatabaseConfigured } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
-import { asLines, syncPaymentFromPaystack, type PaymentOutcome } from "@/lib/orders";
+import { asLines, syncPaymentFromPaystack, type GiftDetails, type PaymentOutcome, type ShippingAddress } from "@/lib/orders";
+import { SendWhatsAppButton } from "@/components/checkout/SendWhatsAppButton";
 import { ButtonLink } from "@/components/ui/Button";
 import { ClearCart } from "./ClearCart";
 
 export const metadata: Metadata = { title: "Order status", robots: { index: false } };
 export const dynamic = "force-dynamic";
+
+const DELIVERY_LABELS: Record<string, string> = {
+  STANDARD: "Standard Delivery",
+  EXPRESS: "Express Shipping",
+  SAME_DAY: "Same-Day Delivery",
+  SCHEDULED: "Scheduled Delivery",
+};
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
@@ -63,6 +72,9 @@ export default async function CheckoutCompletePage({ searchParams }: Props) {
 
   if (outcome === "paid" && order) {
     const lines = asLines(order.items);
+    const address = (order.shippingAddress ?? {}) as unknown as Partial<ShippingAddress>;
+    const gift = (order.gift ?? {}) as unknown as Partial<GiftDetails>;
+    const recipient = `${address.firstName ?? ""} ${address.lastName ?? ""}`.trim();
     return (
       <Shell icon={<CheckCircle2 size={56} strokeWidth={1.4} aria-hidden />} tone="text-success" eyebrow="Payment confirmed" title="Thank you — your gift is on its way to being special.">
         <ClearCart />
@@ -84,7 +96,39 @@ export default async function CheckoutCompletePage({ searchParams }: Props) {
             <span>{formatMoney(order.total, order.currency)}</span>
           </p>
         </div>
-        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        <div className="mx-auto mt-8 max-w-md">
+          <SendWhatsAppButton
+            order={{
+              orderNumber: order.orderNumber ?? order.id.slice(-8),
+              items: lines.map((line) => ({
+                name: line.name,
+                options: Object.entries(line.options ?? {}).map(([key, value]) => `${key}: ${value}`).join(", ") || undefined,
+                personalization: line.personalization || undefined,
+                quantity: line.quantity,
+                price: line.unitPrice,
+              })),
+              deliveryFee: order.shippingFee ?? 0,
+              giftWrapFee: order.giftWrapFee ?? 0,
+              total: order.total,
+              customer: { name: order.customerName, phone: order.customerPhone, email: order.email },
+              delivery: {
+                method: DELIVERY_LABELS[order.deliveryType] ?? order.deliveryType,
+                date: order.deliveryDate ? order.deliveryDate.toISOString().slice(0, 10) : undefined,
+                recipient: recipient || order.customerName,
+                phone: address.phone ?? order.customerPhone,
+                address: [address.line1, address.line2].filter(Boolean).join(", "),
+                city: address.city,
+                state: address.region,
+                country: getDestination(address.country)?.name ?? address.country,
+                instructions: gift.instructions,
+              },
+              gift: { message: gift.message, senderName: gift.senderName },
+              paymentMethod: "Paystack (Online Payment)",
+            }}
+          />
+          <p className="mt-2 text-xs text-muted">Opens WhatsApp with your order details ready to send to our team.</p>
+        </div>
+        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <ButtonLink href={`/track-order?order=${order.orderNumber}`}>Track your order</ButtonLink>
           <ButtonLink href="/shop" variant="secondary">Continue shopping</ButtonLink>
         </div>
