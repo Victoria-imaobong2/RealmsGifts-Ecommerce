@@ -51,8 +51,8 @@ function activeChips(filters: CatalogFilters, fixed: FixedFilter | undefined) {
   if (filters.occasion && fixed !== "occasion") chips.push({ key: "occasion", label: getOccasion(filters.occasion)?.name ?? filters.occasion });
   if (filters.recipient && fixed !== "recipient") chips.push({ key: "recipient", label: `For ${getRecipient(filters.recipient)?.name ?? filters.recipient}` });
   if (filters.budget) chips.push({ key: "budget", label: getBudget(filters.budget)?.label ?? filters.budget });
-  if (filters.minPrice) chips.push({ key: "minPrice", label: `From $${filters.minPrice}` });
-  if (filters.maxPrice) chips.push({ key: "maxPrice", label: `Up to $${filters.maxPrice}` });
+  if (filters.minPrice) chips.push({ key: "minPrice", label: `From ₦${filters.minPrice.toLocaleString("en-NG")}` });
+  if (filters.maxPrice) chips.push({ key: "maxPrice", label: `Up to ₦${filters.maxPrice.toLocaleString("en-NG")}` });
   if (filters.type) chips.push({ key: "type", label: filters.type === "bundle" ? "Bundles" : "Individual gifts" });
   if (filters.availability) chips.push({ key: "availability", label: "Available to order" });
   if (filters.shipTo) chips.push({ key: "shipTo", label: `Delivers to ${getDestination(filters.shipTo)?.name ?? filters.shipTo}` });

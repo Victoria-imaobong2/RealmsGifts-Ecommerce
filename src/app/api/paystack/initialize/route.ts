@@ -205,7 +205,7 @@ export async function POST(req: Request) {
         customerPhone,
         checkoutKey,
         status: "PENDING",
-        currency: "USD",
+        currency: "NGN",
         subtotal: totals.subtotal,
         shippingFee: totals.shipping,
         giftWrapFee: totals.giftWrap,

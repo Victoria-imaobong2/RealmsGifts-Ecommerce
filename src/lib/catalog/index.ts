@@ -33,7 +33,7 @@ async function loadStoreProducts(): Promise<Product[]> {
         shortDescription: row.description.split(". ")[0],
         description: row.description,
         price: row.price,
-        currency: "USD",
+        currency: "NGN",
         sku: `RG-STORE-${row.id.slice(-6).toUpperCase()}`,
         category,
         images: row.images.length

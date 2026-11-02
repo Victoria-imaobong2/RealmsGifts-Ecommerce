@@ -11,7 +11,7 @@ import { useDialog } from "@/lib/hooks";
 import { useUiStore } from "@/store/useUiStore";
 import { SafeImage } from "@/components/product/SafeImage";
 
-const POPULAR = ["Birthday", "Mom", "Perfume", "Chocolate", "Jewelry", "Gift box", "Under $50"];
+const POPULAR = ["Birthday", "Mom", "Perfume", "Chocolate", "Jewelry", "Gift box", "Under ₦50k"];
 
 interface Results {
   total: number;

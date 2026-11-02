@@ -171,6 +171,9 @@ export default function AdminDashboard() {
       if (res.ok) {
         setProducts((prev) => prev.map((p) => (p.id === productId ? { ...p, stock: newStock } : p)));
         setEditingStockId(null);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Failed to update stock.");
       }
     } catch {
       alert("Error updating stock.");

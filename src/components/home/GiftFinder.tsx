@@ -39,10 +39,10 @@ const STEPS = [
     key: "budget",
     question: "What's your budget?",
     options: [
-      { value: "maxPrice=25", label: "Under $25" },
-      { value: "minPrice=25&maxPrice=50", label: "$25–$50" },
-      { value: "minPrice=50&maxPrice=100", label: "$50–$100" },
-      { value: "minPrice=100", label: "$100+" },
+      { value: "maxPrice=25000", label: "Under ₦25,000" },
+      { value: "minPrice=25000&maxPrice=50000", label: "₦25,000–₦50,000" },
+      { value: "minPrice=50000&maxPrice=100000", label: "₦50,000–₦100,000" },
+      { value: "minPrice=100000", label: "₦100,000+" },
     ],
   },
 ] as const;

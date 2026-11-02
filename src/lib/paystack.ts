@@ -33,12 +33,10 @@ export function getPaystackConfig(): PaystackConfig | null {
     console.warn("[paystack] A LIVE secret key is configured outside production. Real cards will be charged.");
   }
 
-  // Fallback to NGN if process.env.PAYSTACK_CURRENCY is not explicitly set to USD
-  const currency = (process.env.PAYSTACK_CURRENCY || "NGN").toUpperCase() as PaystackConfig["currency"];
-  
-  // Provide a sensible fallback rate if PAYSTACK_USD_RATE is missing (e.g. 1 USD = 1500 NGN)
-  const rawRate = Number(process.env.PAYSTACK_USD_RATE);
-  const usdRate = Number.isFinite(rawRate) && rawRate > 0 ? rawRate : (currency === "USD" ? 1 : 1500);
+  // Every catalogue price, delivery fee and gift-wrap fee is already in Naira,
+  // so the charge is the order total as-is: no currency conversion.
+  const currency: PaystackConfig["currency"] = "NGN";
+  const usdRate = 1;
 
   return { secretKey, mode, currency, usdRate };
 }

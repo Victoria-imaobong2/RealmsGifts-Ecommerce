@@ -26,6 +26,6 @@ export async function GET(req: Request) {
       products: products.slice(0, limit).map(toSummary),
       suggestions: params.q ? searchTaxonomy(params.q) : undefined,
     },
-    { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } },
+    { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
   );
 }

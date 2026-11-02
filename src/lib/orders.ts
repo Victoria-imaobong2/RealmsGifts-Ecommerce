@@ -86,7 +86,7 @@ export async function syncPaymentFromPaystack(
 
   if (tx.status === "success") {
     const expectedAmount = order.chargeAmount ?? Math.round(order.total * 100);
-    const expectedCurrency = (order.chargeCurrency ?? "USD").toUpperCase();
+    const expectedCurrency = (order.chargeCurrency ?? "NGN").toUpperCase();
     if (tx.amount !== expectedAmount || tx.currency.toUpperCase() !== expectedCurrency || tx.reference !== reference) {
       console.error(`[orders] Payment mismatch on order ${order.orderNumber}: expected ${expectedAmount} ${expectedCurrency}`);
       await recordOrderEvent(order.id, order.status, "Payment amount did not match — needs review");

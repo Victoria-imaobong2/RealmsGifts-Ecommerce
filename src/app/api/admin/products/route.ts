@@ -4,6 +4,9 @@ import { isAdmin } from "@/lib/auth";
 import { getCategory } from "@/lib/catalog/taxonomy";
 import { prisma } from "@/lib/db";
 
+/** Product pages, shop, categories and home all read the catalogue, so refresh the whole site. */
+const revalidateStorefront = () => revalidatePath("/", "layout");
+
 const slugify = (value: string) =>
   value
     .toLowerCase()
@@ -73,9 +76,7 @@ export async function POST(req: Request) {
       include: { variants: true },
     });
 
-    revalidatePath("/admin");
-    revalidatePath("/shop");
-    revalidatePath("/");
+    revalidateStorefront();
 
     return NextResponse.json({ success: true, product });
   } catch (error: unknown) {
@@ -107,9 +108,7 @@ export async function PUT(req: Request) {
       },
     });
 
-    revalidatePath("/admin");
-    revalidatePath("/shop");
-    revalidatePath("/");
+    revalidateStorefront();
 
     return NextResponse.json({ success: true, product: updated });
   } catch (error: unknown) {
@@ -133,9 +132,7 @@ export async function PATCH(req: Request) {
       data: { stock: parsedStock },
     });
 
-    revalidatePath("/admin");
-    revalidatePath("/shop");
-    revalidatePath("/");
+    revalidateStorefront();
 
     return NextResponse.json({ success: true, product: updated });
   } catch (error: unknown) {
