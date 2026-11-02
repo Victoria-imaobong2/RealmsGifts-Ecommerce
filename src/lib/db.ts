@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeonHttp } from "@prisma/adapter-neon";
-import { neon } from "@neondatabase/serverless";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
@@ -24,11 +23,8 @@ function getClient(): PrismaClient {
   const connectionString = normalizeConnectionString(rawConnectionString);
 
   if (!globalForPrisma.prisma) {
-    const sql = neon(connectionString);
-    
-    // Pass empty options object {} as 2nd argument to satisfy driver types
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const adapter = new PrismaNeonHttp(sql as any, {});
+    // PrismaNeonHttp takes the connection string itself (not a neon() client).
+    const adapter = new PrismaNeonHttp(connectionString, {});
 
     globalForPrisma.prisma = new PrismaClient({
       adapter,
