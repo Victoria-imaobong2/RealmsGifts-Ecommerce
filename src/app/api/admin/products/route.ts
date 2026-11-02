@@ -19,7 +19,8 @@ export async function GET() {
     return NextResponse.json(products);
   } catch (err) {
     console.error("[admin] Products fetch error:", err);
-    return NextResponse.json({ error: "Failed to load products" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Failed to load products";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

@@ -9,11 +9,11 @@ const STATUSES = Object.keys(STATUS_LABELS) as OrderStatus[];
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
-    return NextResponse.json(products);
+    const orders = await prisma.order.findMany({ orderBy: { createdAt: "desc" } });
+    return NextResponse.json(orders);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to load products";
-    console.error("[admin] Products fetch error:", message);
+    const message = err instanceof Error ? err.message : "Failed to load orders";
+    console.error("[admin] Orders fetch error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
