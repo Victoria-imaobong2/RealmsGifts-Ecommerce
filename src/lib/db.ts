@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeonHttp } from "@prisma/adapter-neon";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { neonConfig } from "@neondatabase/serverless";
+import ws from "ws";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
@@ -23,8 +25,10 @@ function getClient(): PrismaClient {
   const connectionString = normalizeConnectionString(rawConnectionString);
 
   if (!globalForPrisma.prisma) {
-    // PrismaNeonHttp takes the connection string itself (not a neon() client).
-    const adapter = new PrismaNeonHttp(connectionString, {});
+    // WebSocket pool, not PrismaNeonHttp: the HTTP adapter can't run transactions,
+    // which updateMany/upsert and nested writes (order payment, login) rely on.
+    neonConfig.webSocketConstructor = ws;
+    const adapter = new PrismaNeon({ connectionString });
 
     globalForPrisma.prisma = new PrismaClient({
       adapter,
