@@ -12,7 +12,7 @@ import {
   Sparkles,
   Truck,
 } from "lucide-react";
-import { AVAILABLE_DESTINATIONS, DESTINATIONS } from "@/config/delivery";
+import { AVAILABLE_DESTINATIONS } from "@/config/delivery";
 import { SITE } from "@/config/site";
 import { ButtonLink } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/primitives";
@@ -85,21 +85,6 @@ export function InternationalBand() {
             Shopping from the US? Send a thoughtful gift to someone you love, whether they&apos;re nearby or miles away.
             Pay in dollars — we&apos;ll handle the rest.
           </p>
-          <ul className="mt-6 flex flex-wrap gap-2" aria-label="Delivery destinations">
-            {DESTINATIONS.map((d) => (
-              <li
-                key={d.code}
-                className={
-                  d.status === "available"
-                    ? "rounded-full bg-white px-4 py-2 text-sm font-medium text-ink ring-1 ring-line"
-                    : "rounded-full px-4 py-2 text-sm text-muted border border-dashed border-line"
-                }
-              >
-                {d.name}
-                {d.status === "coming-soon" && <span className="ml-1 text-xs">· soon</span>}
-              </li>
-            ))}
-          </ul>
         </div>
         <DestinationSelector />
       </div>
