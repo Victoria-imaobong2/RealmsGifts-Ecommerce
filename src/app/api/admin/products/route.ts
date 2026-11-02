@@ -51,9 +51,9 @@ export async function POST(req: Request) {
     const totalVariants = variantColors.length * variantSizes.length;
     const variantStock = Math.floor(parsedStock / totalVariants);
 
-    // PrismaNeonHttp has no interactive transactions, and a nested
-    // `variants: { create }` write needs one. Create the product and its
-    // variants as two separate statements instead.
+    // PrismaNeonHttp has no transactions, and both a nested `variants: { create }`
+    // and `createMany` need one. Create the product, then each variant as its
+    // own single-row insert.
     const created = await prisma.product.create({
       data: {
         title,
@@ -67,16 +67,20 @@ export async function POST(req: Request) {
     });
 
     try {
-      await prisma.productVariant.createMany({
-        data: variantColors.flatMap((color) =>
-          variantSizes.map((size) => ({
-            productId: created.id,
-            color,
-            size,
-            stock: Number.isNaN(variantStock) ? 0 : variantStock,
-          }))
-        ),
-      });
+      await Promise.all(
+        variantColors.flatMap((color) =>
+          variantSizes.map((size) =>
+            prisma.productVariant.create({
+              data: {
+                productId: created.id,
+                color,
+                size,
+                stock: Number.isNaN(variantStock) ? 0 : variantStock,
+              },
+            })
+          )
+        )
+      );
     } catch (variantError) {
       await prisma.product.delete({ where: { id: created.id } }).catch(() => undefined);
       throw variantError;
